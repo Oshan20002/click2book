@@ -3,92 +3,325 @@ import React from "react";
 export default function Home() {
   return (
     <main className="bg-gray-300 h-screen">
+      {/* Theam Topics */}
+      <br />
+      <h1 className="text-6xl text-center font-bold mt-16">Book Any Service</h1>
+      <h1 className="text-6xl text-center font-bold mt-5 text-slate-500">
+        In One Place
+      </h1>
+      <h5 className="text-2xl text-center ml-56 w-2/3 mt-6">
+        Connect with trusted service providers across Sri Lanka. From healthcare
+        to home maintenance, find everything you need.
+      </h5>
 
-        {/* Navigation Bar */}
-      <div className="navbar bg-base-100 shadow-sm p-3 pl-10 pr-10">
-        <div className="navbar-start">
-          <div className="dropdown">
-            <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                {" "}
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h8m-8 6h16"
-                />{" "}
-              </svg>
+      {/* Search Bar */}
+      <div className="flex w-full flex-col">
+        <div className="card bg-base-300 rounded-box grid h-24 w-2/3 ml-56 mt-11 place-items-center">
+          <div className="flex gap-8">
+            <div>
+              <label className="input flex items-center gap-2 bg-white border-slate-500 border-solid border-2 mt-1">
+                <svg
+                  className="h-[1em] opacity-50"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                >
+                  <g
+                    strokeLinejoin="round"
+                    strokeLinecap="round"
+                    strokeWidth="2.5"
+                    fill="none"
+                    stroke="currentColor"
+                  >
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.3-4.3"></path>
+                  </g>
+                </svg>
+                <input type="search" required placeholder="Search" />
+              </label>
             </div>
-            <ul
-              tabIndex={-1}
-              className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-              <li>
-                <a>Item 1</a>
-              </li>
-              <li>
-                <a>Parent</a>
-                <ul className="p-2">
-                  <li>
-                    <a>Submenu 1</a>
-                  </li>
-                  <li>
-                    <a>Submenu 2</a>
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <a>Item 3</a>
-              </li>
-            </ul>
-          </div>
-          <a className="btn btn-ghost text-xl font-bold">Click2Book</a>
-        </div>
-        <div className="navbar-center hidden lg:flex">
-          <ul className="menu menu-horizontal px-1 gap-10 font-bold">
-            <li>
-              <a>Home</a>
-            </li>
-            <li>
-              <details>
-                <summary>Categories</summary>
-                <ul className="p-2">
-                  <li>
-                    <a>Submenu 1</a>
-                  </li>
-                  <li>
-                    <a>Submenu 2</a>
-                  </li>
-                </ul>
+
+            {/* Location */}
+            <div className="dropdown dropdown-start">
+              <div
+                tabIndex={0}
+                role="button"
+                className="btn m-1 w-64 border-slate-500 border-solid border-2"
+              >
+                ⬇️ Location
+              </div>
+              <ul
+                tabIndex={-1}
+                className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
+              >
+                <li>
+                  <a>Item 1</a>
+                </li>
+                <li>
+                  <a>Item 2</a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Price */}
+            <div className="space-y-4">
+              <details className="group relative overflow-hidden rounded border border-slate-500 shadow-sm text-center border-2 mt-1">
+                <summary className="flex items-center justify-between gap-2 p-3 text-gray-700 transition-colors hover:text-gray-900 [&::-webkit-details-marker]:hidden ">
+                  <span className="text-sm font-medium w-52"> Price </span>
+
+                  <span className="transition-transform group-open:-rotate-180">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
+                      stroke="currentColor"
+                      className="size-4"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                      />
+                    </svg>
+                  </span>
+                </summary>
+
+                <div className="divide-y divide-gray-300 border-t border-gray-300 bg-white w-64 h-36 text-center">
+                  <div className="flex items-center justify-between px-3 py-2 ">
+                    <span className="text-sm text-gray-700 ">
+                      {" "}
+                      Max price is $600{" "}
+                    </span>
+
+                    <button
+                      type="button"
+                      className="text-sm text-black underline transition-colors hover:text-gray-900 "
+                    >
+                      Reset
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-3 p-3">
+                    <label htmlFor="MinPrice">
+                      <span className="text-sm text-gray-700"> Min </span>
+
+                      <input
+                        type="number"
+                        id="MinPrice"
+                        value="0"
+                        className="mt-0.5 w-full rounded border-gray-300 shadow-sm sm:text-sm"
+                      />
+                    </label>
+
+                    <label htmlFor="MaxPrice">
+                      <span className="text-sm text-gray-700"> Max </span>
+
+                      <input
+                        type="number"
+                        id="MaxPrice"
+                        value="600"
+                        className="mt-0.5 w-full rounded border-gray-300 shadow-sm sm:text-sm"
+                      />
+                    </label>
+                  </div>
+                </div>
               </details>
-            </li>
-            <li>
-              <a>How It Works</a>
-            </li>
-            <li>
-              <a>About</a>
-            </li>
-          </ul>
-        </div>
-        <div className="navbar-end gap-5">
-          <a className="btn" href="Login">Login</a>
-          <a className="btn bg-slate-600 text-white" href="SignUp">SignUp</a>
+            </div>
+
+            {/* button */}
+            <button
+              type="submit"
+              className="inline-flex items-center py-2.5 px-3 ms-2 text-sm font-medium text-white bg-slate-500 rounded-lg border border-slate-500 hover:bg-slate-500 focus:ring-4 focus:outline-none focus:ring-slate-500 dark:bg-slate-500 dark:hover:bg-black dark:focus:ring-black h-12 mt-1"
+            >
+              <svg
+                className="w-4 h-4 me-2"
+                aria-hidden="true"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                />
+              </svg>
+              Search
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Theam Topics */}
-      <h1 className="text-6xl text-center font-bold mt-16">Book Any Service</h1>
-      <h1 className="text-6xl text-center font-bold mt-5 text-slate-500">In One Place</h1>
-      <h5 className="text-2xl text-center ml-56 w-2/3 mt-6" >Connect with trusted service providers across Sri Lanka. From healthcare to home maintenance, find everything you need.</h5>
+      {/* count */}
+      <div className="flex gap-10">
+        <div>
+          <h1 className="text-5xl font-bold text-center mt-16 ml-64">1000+</h1>
+          <p className="ml-64 mt-5">Services Booked</p>
+        </div>
+        <div>
+          <h1 className="text-5xl font-bold text-center mt-16 ml-64">200+</h1>
+          <p className="ml-64 mt-5">Trusted Providers</p>
+        </div>
+        <div>
+          <h1 className="text-5xl font-bold text-center mt-16 ml-64">25</h1>
+          <p className="ml-64 mt-5">Distric Covered</p>
+        </div>
+      </div>
 
-      <div className="flex w-full flex-col">
-        <div className="card bg-base-300 rounded-box grid h-20 place-items-center w-2/3 ">content</div>
-    </div>
+      <div className="justify-center w-full mt-48 mb-10">
+        <h2 className="text-center text-4xl font-bold">Browse by Category</h2>
+        <p className="text-center mt-3">
+          Find the perfect service provider for you needs across various
+          categories
+        </p>
+      </div>
+
+      <div className="ml-2 flex gap-10 mb-48 justify-center">
+        <div className="card bg-base-100 w-96 shadow-sm ml-5">
+          <figure>
+            <img
+              src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
+              alt="Shoes"
+            />
+          </figure>
+          <div className="card-body">
+            <h2 className="card-title">Card Title</h2>
+            <p>
+              A card component has a figure, a body part, and inside body there
+              are title and actions parts
+            </p>
+            <div className="card-actions justify-end">
+              <button className="btn btn-primary">Buy Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div className="card bg-base-100 w-96 shadow-sm ml-5">
+          <figure>
+            <img
+              src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
+              alt="Shoes"
+            />
+          </figure>
+          <div className="card-body">
+            <h2 className="card-title">Card Title</h2>
+            <p>
+              A card component has a figure, a body part, and inside body there
+              are title and actions parts
+            </p>
+            <div className="card-actions justify-end">
+              <button className="btn btn-primary">Buy Now</button>
+            </div>
+          </div>
+        </div>
+
+        <div className="card bg-base-100 w-96 shadow-sm ml-5">
+          <figure>
+            <img
+              src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
+              alt="Shoes"
+            />
+          </figure>
+          <div className="card-body">
+            <h2 className="card-title">Card Title</h2>
+            <p>
+              A card component has a figure, a body part, and inside body there
+              are title and actions parts
+            </p>
+            <div className="card-actions justify-end">
+              <button className="btn btn-primary">Buy Now</button>
+            </div>
+          </div>
+        </div>
+     </div>
+
+
+
+
+
+
+
+      <footer className="footer sm:footer-horizontal bg-base-200 text-base-content p-10">
+        <nav>
+          <h6 className="footer-title">Services</h6>
+          <a className="link link-hover">Branding</a>
+          <a className="link link-hover">Design</a>
+          <a className="link link-hover">Marketing</a>
+          <a className="link link-hover">Advertisement</a>
+        </nav>
+        <nav>
+          <h6 className="footer-title">Company</h6>
+          <a className="link link-hover">About us</a>
+          <a className="link link-hover">Contact</a>
+          <a className="link link-hover">Jobs</a>
+          <a className="link link-hover">Press kit</a>
+        </nav>
+        <nav>
+          <h6 className="footer-title">Legal</h6>
+          <a className="link link-hover">Terms of use</a>
+          <a className="link link-hover">Privacy policy</a>
+          <a className="link link-hover">Cookie policy</a>
+        </nav>
+      </footer>
+      <footer className="footer bg-base-200 text-base-content border-base-300 border-t px-10 py-4">
+        <aside className="grid-flow-col items-center">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+            fillRule="evenodd"
+            clipRule="evenodd"
+            className="fill-current"
+          >
+            <path d="M22.672 15.226l-2.432.811.841 2.515c.33 1.019-.209 2.127-1.23 2.456-1.15.325-2.148-.321-2.463-1.226l-.84-2.518-5.013 1.677.84 2.517c.391 1.203-.434 2.542-1.831 2.542-.88 0-1.601-.564-1.86-1.314l-.842-2.516-2.431.809c-1.135.328-2.145-.317-2.463-1.229-.329-1.018.211-2.127 1.231-2.456l2.432-.809-1.621-4.823-2.432.808c-1.355.384-2.558-.59-2.558-1.839 0-.817.509-1.582 1.327-1.846l2.433-.809-.842-2.515c-.33-1.02.211-2.129 1.232-2.458 1.02-.329 2.13.209 2.461 1.229l.842 2.515 5.011-1.677-.839-2.517c-.403-1.238.484-2.553 1.843-2.553.819 0 1.585.509 1.85 1.326l.841 2.517 2.431-.81c1.02-.33 2.131.211 2.461 1.229.332 1.018-.21 2.126-1.23 2.456l-2.433.809 1.622 4.823 2.433-.809c1.242-.401 2.557.484 2.557 1.838 0 .819-.51 1.583-1.328 1.847m-8.992-6.428l-5.01 1.675 1.619 4.828 5.011-1.674-1.62-4.829z"></path>
+          </svg>
+          <p>
+            ACME Industries Ltd.
+            <br />
+            Providing reliable tech since 1992
+          </p>
+        </aside>
+        <nav className="md:place-self-center md:justify-self-end">
+          <div className="grid grid-flow-col gap-4">
+            <a>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                className="fill-current"
+              >
+                <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"></path>
+              </svg>
+            </a>
+            <a>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                className="fill-current"
+              >
+                <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"></path>
+              </svg>
+            </a>
+            <a>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                className="fill-current"
+              >
+                <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"></path>
+              </svg>
+            </a>
+          </div>
+        </nav>
+      </footer>
     </main>
   );
 }
