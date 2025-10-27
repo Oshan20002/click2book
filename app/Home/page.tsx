@@ -2,7 +2,7 @@ import React from "react";
 
 export default function Home() {
   return (
-    <main className="bg-blue-200 h-screen">
+    <main className="bg-blue-200 w-full min-h-screen px-4 sm:px-6 lg:px-16 py-10 bg-base-100">
       {/* Theam Topics */}
       <br />
       <h1 className="text-6xl text-center font-bold mt-16">Book Any Service</h1>
@@ -426,7 +426,7 @@ export default function Home() {
         </p>
       </div>
 
-      <div className="ml-2 flex gap-10 mb-48 justify-center ">
+      <div className="ml-2 flex gap-10 mb-48 justify-center">
         <div className="card bg-base-100 w-64 h-auto bg-blue-100 shadow-sm border-b-4 border-r-4 border-2 border-slate-500 hover:scale-105 transition-transform">
           <div className="card-body items-center text-center">
             <img

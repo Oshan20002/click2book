@@ -76,7 +76,7 @@ export default function Navbar() {
             <a>How It Works</a>
           </li>
           <li>
-            <a>About</a>
+            <a href="About">About</a>
           </li>
         </ul>
       </div>
