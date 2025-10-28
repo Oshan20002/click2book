@@ -57,7 +57,7 @@ export default function Navbar() {
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1 gap-10 font-bold">
           <li>
-            <a>Home</a>
+            <a href="Home">Home</a>
           </li>
           <li>
             <details>
@@ -73,7 +73,7 @@ export default function Navbar() {
             </details>
           </li>
           <li>
-            <a>How It Works</a>
+            <a href="HowItWorks">How It Works</a>
           </li>
           <li>
             <a href="About">About</a>
