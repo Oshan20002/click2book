@@ -182,14 +182,14 @@ export default function HowItWorks() {
           <div className="card-body items-center text-center">
             <img
               className="w-20"
-              src="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/icons/shield.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpY29ucy9zaGllbGQucG5nIiwiaWF0IjoxNzYxNTY0MDg1LCJleHAiOjE3OTMxMDAwODV9.xTzdjifEEMMh6tdxfbgZYdXjIVS2FvfobuIxi-Y2TzA"
+              src="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/icons/shield%20(1).png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpY29ucy9zaGllbGQgKDEpLnBuZyIsImlhdCI6MTc2MTczOTI1MCwiZXhwIjoxNzkzMjc1MjUwfQ.Qf6Ae9vAoByn_kqQ-lWxTL9DsIgM7fdmGMCEGfhEGZs"
               alt="shiled icon"
             />
             <br />
-            <h2 className="card-title">Trust</h2>
+            <h2 className="card-title">Vefified Providers</h2>
             <p>
-              We verify all service providers and maintain transparent reviews
-              to build trust.
+              All service providers are 
+              thoroughly vetted and verified for quality and reliability
             </p>
           </div>
         </div>
@@ -198,14 +198,14 @@ export default function HowItWorks() {
           <div className="card-body items-center text-center">
             <img
               className="w-20"
-              src="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/icons/star%20(1).png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpY29ucy9zdGFyICgxKS5wbmciLCJpYXQiOjE3NjE1NjQzNTQsImV4cCI6MTc5MzEwMDM1NH0.TRwhCAVgfA1ORmB_F2XCjIT9sWtBR9-r8i6DKMO2nag"
+              src="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/icons/credit-card.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpY29ucy9jcmVkaXQtY2FyZC5wbmciLCJpYXQiOjE3NjE3MzkzNjcsImV4cCI6MTc5MzI3NTM2N30.CH3sIliWU-wmW4oagtIcf9KvApbFNUZRIlNoaw3YuCY"
               alt="star icon"
             />
             <br />
-            <h2 className="card-title">Quality</h2>
+            <h2 className="card-title">Secure Payments</h2>
             <p>
-              We maintain high standards and only work with skilled,
-              professional service providers.
+              Secure payment processing with multiple 
+              payment options and buyer protection.
             </p>
           </div>
         </div>
@@ -214,14 +214,13 @@ export default function HowItWorks() {
           <div className="card-body items-center text-center">
             <img
               className="w-20"
-              src="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/icons/right-arrow.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpY29ucy9yaWdodC1hcnJvdy5wbmciLCJpYXQiOjE3NjE1NjQ1ODUsImV4cCI6MTc5MzEwMDU4NX0.yJFRce_wCpmCtX8ulTQpKC5Ev2s6nfSnKiVg-jKyAV4"
+              src="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/icons/24-hours.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpY29ucy8yNC1ob3Vycy5wbmciLCJpYXQiOjE3NjE3MzkxNTgsImV4cCI6MTc5MzI3NTE1OH0.ZlNxPN8Z2RBTBqVu9VUmAa_-2yrw5d9_vO16E_206e8"
               alt="Skip icon"
             />
             <br />
-            <h2 className="card-title">Efficiency</h2>
+            <h2 className="card-title">24/7 Support</h2>
             <p>
-              We make booking services quick and easy, saving time for both
-              customers and providers.
+              Round-the-clock customer support to help you with any questions or concerns.
             </p>
           </div>
         </div>
@@ -230,13 +229,14 @@ export default function HowItWorks() {
           <div className="card-body items-center text-center">
             <img
               className="w-20"
-              src="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/icons/heart.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpY29ucy9oZWFydC5wbmciLCJpYXQiOjE3NjE1NjQ3MjEsImV4cCI6MTc5MzEwMDcyMX0.G91vt7NzUv9vHA3MnMOnqp2742NdGNjh_Fp4Gf4OaN4"
+              src="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/icons/quality-assurance.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpY29ucy9xdWFsaXR5LWFzc3VyYW5jZS5wbmciLCJpYXQiOjE3NjE3MzkzMjAsImV4cCI6MTc5MzI3NTMyMH0.yRU9I2Pv0mBzh7JVwUjC36LqS5qxjyC0ZTxs3r0eAf4"
               alt="hart icon"
             />
             <br />
-            <h2 className="card-title">Community</h2>
+            <h2 className="card-title">Quality Guarantee</h2>
             <p>
-              We support local businesses and strengthen Sri Lankan communities.
+              Money-back guarantee if youre not 
+              satisfied with the service quality.
             </p>
           </div>
         </div>
