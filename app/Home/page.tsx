@@ -16,143 +16,119 @@ export default function Home() {
           healthcare to home maintenance, find everything you need.
         </h5>
 
-        {/* Search Bar */}
-        <div className="flex w-full flex-col">
-          <div className="card bg-base-300 rounded-box grid h-24 w-2/3 ml-56 mt-11 place-items-center">
-            <div className="flex gap-8">
-              <div>
-                <label className="input flex items-center gap-2 bg-white border-slate-500 border-solid border-2 mt-1">
-                  <svg
-                    className="h-[1em] opacity-50"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                  >
-                    <g
-                      strokeLinejoin="round"
-                      strokeLinecap="round"
-                      strokeWidth="2.5"
-                      fill="none"
-                      stroke="currentColor"
-                    >
-                      <circle cx="11" cy="11" r="8"></circle>
-                      <path d="m21 21-4.3-4.3"></path>
-                    </g>
-                  </svg>
-                  <input type="search" required placeholder="Search" />
-                </label>
-              </div>
-
-              {/* Location */}
-              <div className="dropdown dropdown-start">
-                <div
-                  tabIndex={0}
-                  role="button"
-                  className="btn m-1 w-64 border-slate-500 border-solid border-2"
-                >
-                  ⬇️ Location
-                </div>
-                <ul
-                  tabIndex={-1}
-                  className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
-                >
-                  <li>
-                    <a>Item 1</a>
-                  </li>
-                  <li>
-                    <a>Item 2</a>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Price */}
-              <div className="space-y-4">
-                <details className="group relative overflow-hidden rounded border border-slate-500 shadow-sm text-center border-2 mt-1">
-                  <summary className="flex items-center justify-between gap-2 p-3 text-gray-700 transition-colors hover:text-gray-900 [&::-webkit-details-marker]:hidden ">
-                    <span className="text-sm font-medium w-52"> Price </span>
-
-                    <span className="transition-transform group-open:-rotate-180">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth="1.5"
-                        stroke="currentColor"
-                        className="size-4"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-                        />
-                      </svg>
-                    </span>
-                  </summary>
-
-                  <div className="divide-y divide-gray-300 border-t border-gray-300 bg-white w-64 h-36 text-center">
-                    <div className="flex items-center justify-between px-3 py-2 ">
-                      <span className="text-sm text-gray-700 ">
-                        {" "}
-                        Max price is $600{" "}
-                      </span>
-
-                      <button
-                        type="button"
-                        className="text-sm text-black underline transition-colors hover:text-gray-900 "
-                      >
-                        Reset
-                      </button>
-                    </div>
-
-                    <div className="flex items-center gap-3 p-3">
-                      <label htmlFor="MinPrice">
-                        <span className="text-sm text-gray-700"> Min </span>
-
-                        <input
-                          type="number"
-                          id="MinPrice"
-                          value="0"
-                          className="mt-0.5 w-full rounded border-gray-300 shadow-sm sm:text-sm"
-                        />
-                      </label>
-
-                      <label htmlFor="MaxPrice">
-                        <span className="text-sm text-gray-700"> Max </span>
-
-                        <input
-                          type="number"
-                          id="MaxPrice"
-                          value="600"
-                          className="mt-0.5 w-full rounded border-gray-300 shadow-sm sm:text-sm"
-                        />
-                      </label>
-                    </div>
-                  </div>
-                </details>
-              </div>
-
-              {/* button */}
-              <button
-                type="submit"
-                className="inline-flex items-center py-2.5 px-3 ms-2 text-sm font-medium text-white bg-slate-500 rounded-lg border border-slate-500 hover:bg-slate-500 focus:ring-4 focus:outline-none focus:ring-slate-500 dark:bg-slate-500 dark:hover:bg-black dark:focus:ring-black h-12 mt-1"
+        {/* Search Bar Section */}
+        <div className="flex justify-center w-full mt-12 px-4">
+          <div className="flex flex-wrap justify-center items-center gap-4 bg-base-300 rounded-2xl shadow-md p-6 w-full max-w-5xl">
+            {/* Search Input */}
+            <label className="input flex items-center gap-2 bg-white border border-slate-400 rounded-lg px-3 py-2 w-64">
+              <svg
+                className="h-5 w-5 text-slate-500"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+                stroke="currentColor"
               >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 21l-4.3-4.3M11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14z"
+                />
+              </svg>
+              <input
+                type="search"
+                placeholder="Search services..."
+                className="w-full focus:outline-none"
+              />
+            </label>
+
+            {/* Location Dropdown */}
+            <div className="dropdown dropdown-start ">
+              <div
+                tabIndex={0}
+                role="button"
+                className="btn w-48 border border-slate-400 bg-white text-slate-700 font-medium hover:bg-slate-100 w-64"
+              >
+                📍 Location
+              </div>
+              <ul
+                tabIndex={-1}
+                className="dropdown-content menu bg-base-100 rounded-box z-[1] w-48 p-2 shadow-md"
+              >
+                <li>
+                  <a>Colombo</a>
+                </li>
+                <li>
+                  <a>Kandy</a>
+                </li>
+                <li>
+                  <a>Galle</a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Price Dropdown */}
+            <details className="group relative rounded-lg border border-slate-400 bg-white shadow-sm w-64 h-11">
+              <summary className="flex items-center justify-between p-2 text-slate-700 cursor-pointer">
+                <span className="text-sm font-medium">💰 Price</span>
                 <svg
-                  className="w-4 h-4 me-2"
-                  aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 transition-transform group-open:rotate-180"
                   fill="none"
-                  viewBox="0 0 20 20"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
                   <path
-                    stroke="currentColor"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M19.5 8.25l-7.5 7.5-7.5-7.5"
                   />
                 </svg>
-                Search
-              </button>
-            </div>
+              </summary>
+              <div className="border-t border-gray-200 p-3 space-y-3 bg-white">
+                <div className="flex items-center justify-between text-sm text-gray-600">
+                  <span>Max price is $600</span>
+                  <button className="text-slate-600 underline hover:text-black">
+                    Reset
+                  </button>
+                </div>
+                <div className="flex gap-3">
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    className="w-full border rounded-md p-1 text-sm"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    className="w-full border rounded-md p-1 text-sm"
+                  />
+                </div>
+              </div>
+            </details>
+
+            {/* Search Button */}
+            <button
+              type="submit"
+              className="btn bg-slate-600 hover:bg-slate-700 text-white px-5 py-2 rounded-lg flex items-center gap-2"
+            >
+              <svg
+                className="w-4 h-4"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                />
+              </svg>
+              Search
+            </button>
           </div>
         </div>
 
