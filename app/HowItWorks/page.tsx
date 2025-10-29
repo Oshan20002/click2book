@@ -138,7 +138,7 @@ export default function HowItWorks() {
         <div className="card rounded-box grid h-auto grow p-11 w-full mr-16">
           <img
             className="rounded-box"
-            src="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/Images/compare.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZXMvY29tcGFyZS5qcGciLCJpYXQiOjE3NjE2NTY3MTksImV4cCI6MTc5MzE5MjcxOX0.2WsG2SjeK2r6gCglYvELT3iAm-TE5qGb_u2vYmA3xGM"
+            src="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/Images/enjoy.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZXMvZW5qb3kuanBnIiwiaWF0IjoxNzYxNzMzODIzLCJleHAiOjE3OTMyNjk4MjN9.YQMTRz2vt6ejOqvc-c8AX17pmKe80QLWSD4eDTJbZ9A"
             alt="compare"
           />
         </div>
@@ -146,7 +146,7 @@ export default function HowItWorks() {
         <div className="card rounded-box grid h-auto grow p-11 w-full mr-16">
           <div className="flex gap-3 mb-5">
             <img
-              src="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/Images/BookandPay.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZXMvQm9va2FuZFBheS5qcGciLCJpYXQiOjE3NjE2NTczMzksImV4cCI6MTc5MzE5MzMzOX0.g_D6gzrwLUXwgb2xqJQbP3TV4g3ZMWlFerRpF6HdKHY"
+              src="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/icons/rate.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpY29ucy9yYXRlLnBuZyIsImlhdCI6MTc2MTczMzg5NywiZXhwIjoxNzkzMjY5ODk3fQ.LCff8ZCbSaV-1Jyhqs_20qiDcwlns8oi-MMI7-07WmE"
               alt="Search"
               className="w-10 h-10"
             />
@@ -169,72 +169,11 @@ export default function HowItWorks() {
         </div>
       </div>
 
-      {/* Our story */}
-      <div className="">
-        <div className="card bg-base-300 rounded-box grid h-auto place-items-center bg-blue-100">
-          <h1 className="text-4xl text-center font-bold mt-16">Our Story</h1>
-          <h5 className="text-xl text-center w-2/3 mt-6 mb-16">
-            Founded in 2025, Click2Book started with a simple idea: make it
-            easier for Sri Lankans to find reliable local services.
-          </h5>
-
-          <div className="ml-2 flex gap-20 mb-20 justify-center">
-            <div className="card bg-base-100 w-80 h-auto bg-white shadow-sm border-b-4 border-r-4 border-2 border-slate-500 hover:scale-105 transition-transform">
-              <div className="card-body items-center text-center">
-                <img
-                  className="w-20"
-                  src="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/icons/lightbulb.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpY29ucy9saWdodGJ1bGIucG5nIiwiaWF0IjoxNzYxNTYzNTA5LCJleHAiOjE3OTMwOTk1MDl9.w2i1pQGvpk8bqyGSFrDhSQQmmEgfHbClHyA20s-JPpg"
-                  alt="bulb icon"
-                />
-                <p className="font-bold">The Idea</p>
-                <p>
-                  Frustrated by the difficulty of finding reliable service
-                  providers, our founders decided to create a platform that
-                  would solve this problem for everyone.
-                </p>
-              </div>
-            </div>
-
-            <div className="card bg-base-100 w-80 h-auto bg-white shadow-sm border-b-4 border-r-4 border-2 border-slate-500 hover:scale-105 transition-transform">
-              <div className="card-body items-center text-center">
-                <img
-                  className="w-20"
-                  src="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/icons/rocket.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpY29ucy9yb2NrZXQucG5nIiwiaWF0IjoxNzYxNTYzNjg3LCJleHAiOjE3OTMwOTk2ODd9.mS8HJbOOTTAQMw-_OD03O49W4ohYUmt2MM8Hy5ByDcg"
-                  alt="rockert icon"
-                />
-                <p className="font-bold">The Launch</p>
-                <p>
-                  Starting with just 50 service providers in Colombo, we quickly
-                  expanded across Sri Lanka as word spread about our reliable
-                  platform.
-                </p>
-              </div>
-            </div>
-
-            <div className="card bg-base-100 w-80 h-auto bg-white shadow-sm border-b-4 border-r-4 border-2 border-slate-500 hover:scale-105 transition-transform">
-              <div className="card-body items-center text-center">
-                <img
-                  className="w-20"
-                  src="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/icons/cup.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpY29ucy9jdXAucG5nIiwiaWF0IjoxNzYxNTYzNzk4LCJleHAiOjE3OTMwOTk3OTh9.RkJjXqwS20M3MfKnPJmdCZUyplljQknKeGTbci0Bwt0"
-                  alt="search icon"
-                />
-                <p className="font-bold">Today</p>
-                <p>
-                  We're now Sri Lanka's leading service marketplace, connecting
-                  thousands of service providers with customers every day.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Our Values */}
+      {/* Why Choose Click2Book? */}
       <div className="justify-center w-full mt-20 mb-10">
-        <h2 className="text-center text-4xl font-bold">Our Values</h2>
+        <h2 className="text-center text-4xl font-bold">Why Choose Click2Book?</h2>
         <p className="text-center mt-3">
-          These core values guide everything we do and shape our platform's
-          culture.
+          We provide peace of mind with every booking
         </p>
       </div>
 
