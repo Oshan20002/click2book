@@ -2,177 +2,182 @@ import React from "react";
 
 export default function Home() {
   return (
-    <main className="bg-blue-200 w-full min-h-screen px-4 sm:px-6 lg:px-16 py-10 bg-base-100">
+    <main className="bg-white">
       {/* Theam Topics */}
-      <br />
-      <h1 className="text-6xl text-center font-bold mt-16">Book Any Service</h1>
-      <h1 className="text-6xl text-center font-bold mt-5 text-slate-500">
-        In One Place
-      </h1>
-      <h5 className="text-2xl text-center ml-56 w-2/3 mt-6">
-        Connect with trusted service providers across Sri Lanka. From healthcare
-        to home maintenance, find everything you need.
-      </h5>
+      <div className="bg-blue-200 w-full min-h-screen px-4 sm:px-6 lg:px-16 py-10 bg-base-100">
+        <h1 className="text-6xl text-center font-bold mt-16">
+          Book Any Service
+        </h1>
+        <h1 className="text-6xl text-center font-bold mt-5 text-slate-500">
+          In One Place
+        </h1>
+        <h5 className="text-2xl text-center ml-56 w-2/3 mt-6">
+          Connect with trusted service providers across Sri Lanka. From
+          healthcare to home maintenance, find everything you need.
+        </h5>
 
-      {/* Search Bar */}
-      <div className="flex w-full flex-col">
-        <div className="card bg-base-300 rounded-box grid h-24 w-2/3 ml-56 mt-11 place-items-center">
-          <div className="flex gap-8">
-            <div>
-              <label className="input flex items-center gap-2 bg-white border-slate-500 border-solid border-2 mt-1">
-                <svg
-                  className="h-[1em] opacity-50"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                >
-                  <g
-                    strokeLinejoin="round"
-                    strokeLinecap="round"
-                    strokeWidth="2.5"
-                    fill="none"
-                    stroke="currentColor"
+        {/* Search Bar */}
+        <div className="flex w-full flex-col">
+          <div className="card bg-base-300 rounded-box grid h-24 w-2/3 ml-56 mt-11 place-items-center">
+            <div className="flex gap-8">
+              <div>
+                <label className="input flex items-center gap-2 bg-white border-slate-500 border-solid border-2 mt-1">
+                  <svg
+                    className="h-[1em] opacity-50"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
                   >
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.3-4.3"></path>
-                  </g>
-                </svg>
-                <input type="search" required placeholder="Search" />
-              </label>
-            </div>
-
-            {/* Location */}
-            <div className="dropdown dropdown-start">
-              <div
-                tabIndex={0}
-                role="button"
-                className="btn m-1 w-64 border-slate-500 border-solid border-2"
-              >
-                ⬇️ Location
-              </div>
-              <ul
-                tabIndex={-1}
-                className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
-              >
-                <li>
-                  <a>Item 1</a>
-                </li>
-                <li>
-                  <a>Item 2</a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Price */}
-            <div className="space-y-4">
-              <details className="group relative overflow-hidden rounded border border-slate-500 shadow-sm text-center border-2 mt-1">
-                <summary className="flex items-center justify-between gap-2 p-3 text-gray-700 transition-colors hover:text-gray-900 [&::-webkit-details-marker]:hidden ">
-                  <span className="text-sm font-medium w-52"> Price </span>
-
-                  <span className="transition-transform group-open:-rotate-180">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
+                    <g
+                      strokeLinejoin="round"
+                      strokeLinecap="round"
+                      strokeWidth="2.5"
                       fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
                       stroke="currentColor"
-                      className="size-4"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M19.5 8.25l-7.5 7.5-7.5-7.5"
-                      />
-                    </svg>
-                  </span>
-                </summary>
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <path d="m21 21-4.3-4.3"></path>
+                    </g>
+                  </svg>
+                  <input type="search" required placeholder="Search" />
+                </label>
+              </div>
 
-                <div className="divide-y divide-gray-300 border-t border-gray-300 bg-white w-64 h-36 text-center">
-                  <div className="flex items-center justify-between px-3 py-2 ">
-                    <span className="text-sm text-gray-700 ">
-                      {" "}
-                      Max price is $600{" "}
-                    </span>
-
-                    <button
-                      type="button"
-                      className="text-sm text-black underline transition-colors hover:text-gray-900 "
-                    >
-                      Reset
-                    </button>
-                  </div>
-
-                  <div className="flex items-center gap-3 p-3">
-                    <label htmlFor="MinPrice">
-                      <span className="text-sm text-gray-700"> Min </span>
-
-                      <input
-                        type="number"
-                        id="MinPrice"
-                        value="0"
-                        className="mt-0.5 w-full rounded border-gray-300 shadow-sm sm:text-sm"
-                      />
-                    </label>
-
-                    <label htmlFor="MaxPrice">
-                      <span className="text-sm text-gray-700"> Max </span>
-
-                      <input
-                        type="number"
-                        id="MaxPrice"
-                        value="600"
-                        className="mt-0.5 w-full rounded border-gray-300 shadow-sm sm:text-sm"
-                      />
-                    </label>
-                  </div>
+              {/* Location */}
+              <div className="dropdown dropdown-start">
+                <div
+                  tabIndex={0}
+                  role="button"
+                  className="btn m-1 w-64 border-slate-500 border-solid border-2"
+                >
+                  ⬇️ Location
                 </div>
-              </details>
-            </div>
+                <ul
+                  tabIndex={-1}
+                  className="dropdown-content menu bg-base-100 rounded-box z-1 w-52 p-2 shadow-sm"
+                >
+                  <li>
+                    <a>Item 1</a>
+                  </li>
+                  <li>
+                    <a>Item 2</a>
+                  </li>
+                </ul>
+              </div>
 
-            {/* button */}
-            <button
-              type="submit"
-              className="inline-flex items-center py-2.5 px-3 ms-2 text-sm font-medium text-white bg-slate-500 rounded-lg border border-slate-500 hover:bg-slate-500 focus:ring-4 focus:outline-none focus:ring-slate-500 dark:bg-slate-500 dark:hover:bg-black dark:focus:ring-black h-12 mt-1"
-            >
-              <svg
-                className="w-4 h-4 me-2"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 20 20"
+              {/* Price */}
+              <div className="space-y-4">
+                <details className="group relative overflow-hidden rounded border border-slate-500 shadow-sm text-center border-2 mt-1">
+                  <summary className="flex items-center justify-between gap-2 p-3 text-gray-700 transition-colors hover:text-gray-900 [&::-webkit-details-marker]:hidden ">
+                    <span className="text-sm font-medium w-52"> Price </span>
+
+                    <span className="transition-transform group-open:-rotate-180">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="1.5"
+                        stroke="currentColor"
+                        className="size-4"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M19.5 8.25l-7.5 7.5-7.5-7.5"
+                        />
+                      </svg>
+                    </span>
+                  </summary>
+
+                  <div className="divide-y divide-gray-300 border-t border-gray-300 bg-white w-64 h-36 text-center">
+                    <div className="flex items-center justify-between px-3 py-2 ">
+                      <span className="text-sm text-gray-700 ">
+                        {" "}
+                        Max price is $600{" "}
+                      </span>
+
+                      <button
+                        type="button"
+                        className="text-sm text-black underline transition-colors hover:text-gray-900 "
+                      >
+                        Reset
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-3 p-3">
+                      <label htmlFor="MinPrice">
+                        <span className="text-sm text-gray-700"> Min </span>
+
+                        <input
+                          type="number"
+                          id="MinPrice"
+                          value="0"
+                          className="mt-0.5 w-full rounded border-gray-300 shadow-sm sm:text-sm"
+                        />
+                      </label>
+
+                      <label htmlFor="MaxPrice">
+                        <span className="text-sm text-gray-700"> Max </span>
+
+                        <input
+                          type="number"
+                          id="MaxPrice"
+                          value="600"
+                          className="mt-0.5 w-full rounded border-gray-300 shadow-sm sm:text-sm"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                </details>
+              </div>
+
+              {/* button */}
+              <button
+                type="submit"
+                className="inline-flex items-center py-2.5 px-3 ms-2 text-sm font-medium text-white bg-slate-500 rounded-lg border border-slate-500 hover:bg-slate-500 focus:ring-4 focus:outline-none focus:ring-slate-500 dark:bg-slate-500 dark:hover:bg-black dark:focus:ring-black h-12 mt-1"
               >
-                <path
-                  stroke="currentColor"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                />
-              </svg>
-              Search
-            </button>
+                <svg
+                  className="w-4 h-4 me-2"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    stroke="currentColor"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                  />
+                </svg>
+                Search
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* count */}
+        <div className="flex gap-10">
+          <div>
+            <h1 className="text-5xl font-bold text-center mt-16 ml-64">
+              1000+
+            </h1>
+            <p className="ml-64 mt-5">Services Booked</p>
+          </div>
+          <div>
+            <h1 className="text-5xl font-bold text-center mt-16 ml-64">200+</h1>
+            <p className="ml-64 mt-5">Trusted Providers</p>
+          </div>
+          <div>
+            <h1 className="text-5xl font-bold text-center mt-16 ml-64">25</h1>
+            <p className="ml-64 mt-5">Distric Covered</p>
           </div>
         </div>
       </div>
 
-      {/* count */}
-      <div className="flex gap-10">
-        <div>
-          <h1 className="text-5xl font-bold text-center mt-16 ml-64">1000+</h1>
-          <p className="ml-64 mt-5">Services Booked</p>
-        </div>
-        <div>
-          <h1 className="text-5xl font-bold text-center mt-16 ml-64">200+</h1>
-          <p className="ml-64 mt-5">Trusted Providers</p>
-        </div>
-        <div>
-          <h1 className="text-5xl font-bold text-center mt-16 ml-64">25</h1>
-          <p className="ml-64 mt-5">Distric Covered</p>
-        </div>
-      </div>
-
       <br />
 
-      <div className="justify-center w-full mt-48 mb-10">
+      <div className="justify-center w-full mt-20 mb-10">
         <h2 className="text-center text-4xl font-bold">Browse by Category</h2>
         <p className="text-center mt-3">
           Find the perfect service provider for you needs across various
@@ -290,7 +295,9 @@ export default function Home() {
       </div>
 
       <div className="flex justify-center">
-        <button className="btn btn-wide mb-20 hover:scale-105 transition-transform">View All Categories</button>
+        <button className="btn btn-wide mb-20 hover:scale-105 transition-transform">
+          View All Categories
+        </button>
       </div>
 
       {/* Featured Services */}
@@ -413,7 +420,9 @@ export default function Home() {
           </div>
 
           <div className="flex justify-center">
-            <button className="btn btn-wide mb-20 hover:scale-105 transition-transform ">View All Services</button>
+            <button className="btn btn-wide mb-20 hover:scale-105 transition-transform ">
+              View All Services
+            </button>
           </div>
         </div>
       </div>
@@ -495,13 +504,18 @@ export default function Home() {
       {/* banner */}
       <div className="ml-2 flex gap-10 mb-48 justify-center -mt-28 hover:scale-105 transition-transform">
         <div className="card bg-base-300 rounded-box grid h-20 place-items-center w-2/3 h-auto p-10 bg-blue-200">
-          <h2 className="text-center text-4xl font-bold">Ready to Get Started?</h2>
+          <h2 className="text-center text-4xl font-bold">
+            Ready to Get Started?
+          </h2>
           <p className="text-center mt-3">
-            Join thousands of satisfied customers who trust Click2Book for all their service needs
+            Join thousands of satisfied customers who trust Click2Book for all
+            their service needs
           </p>
           <div className="flex justify-center gap-6 mt-8">
             <button className="btn btn-primary w-48">Find a Service</button>
-            <button className="btn btn-outline btn-primary w-48">Primary</button>
+            <button className="btn btn-outline btn-primary w-48">
+              Primary
+            </button>
           </div>
         </div>
       </div>

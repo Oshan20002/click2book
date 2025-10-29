@@ -11,8 +11,8 @@ export default function About() {
             About Click2Book
           </h1>
           <h5 className="text-2xl text-center w-2/3 mt-6 mb-16">
-            Connecting Sri Lanka's finest service providers with customers who
-            need reliable, professional services. We're building the future of
+            Connecting Sri Lanka s finest service providers with customers who
+            need reliable, professional services. We are building the future of
             local service discovery
           </h5>
         </div>
@@ -109,7 +109,7 @@ export default function About() {
                 />
                 <p className="font-bold">Today</p>
                 <p>
-                  We're now Sri Lanka's leading service marketplace, connecting thousands of service providers with customers every day.
+                  We are now Sri Lanka s leading service marketplace, connecting thousands of service providers with customers every day.
                 </p>
               </div>
             </div>
@@ -121,7 +121,7 @@ export default function About() {
       <div className="justify-center w-full mt-20 mb-10">
         <h2 className="text-center text-4xl font-bold">Our Values</h2>
         <p className="text-center mt-3">
-          These core values guide everything we do and shape our platform's culture.
+          These core values guide everything we do and shape our platform s culture.
         </p>
       </div>
 
