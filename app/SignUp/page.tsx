@@ -1,68 +1,207 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "next/navigation";
 
 export default function SignUp() {
+  const router = useRouter();
+
+  const [form, setForm] = useState({
+    role: "customer",
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    agree: true,
+  });
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSignUp = async () => {
+    if (!form.agree) {
+      alert("You must agree to Terms & Conditions");
+      return;
+    }
+
+    if (form.password !== form.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+
+    // 1️⃣ Create auth user
+    const { data, error } = await supabase.auth.signUp({
+      email: form.email,
+      password: form.password,
+    });
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    // 2️⃣ Insert user profile
+    const { error: profileError } = await supabase.from("users").insert({
+      id: data.user.id,
+      first_name: form.firstName,
+      last_name: form.lastName,
+      email: form.email,
+      role: form.role,
+    });
+
+    if (profileError) {
+      alert(profileError.message);
+      return;
+    }
+
+    alert("Account created successfully!");
+    router.push("/login");
+  };
+
   return (
     <main>
-      <h1 className="text-center mt-10 font-bold text-5xl ml-24" >Click2Book</h1>
-      <h2 className="text-center mt-5 font-bold text-2xl ml-24">SignUp</h2>
+      <h1 className="text-center mt-10 font-bold text-5xl ml-24">
+        Click2Book
+      </h1>
+      <h2 className="text-center mt-5 font-bold text-2xl ml-24">
+        SignUp
+      </h2>
+
       <div className="w-1/3 mx-auto mt-5">
-        <fieldset className="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-10">
+        <fieldset className="fieldset bg-base-200 border-base-300 rounded-box border p-10">
           <label className="label text-xl">I want to join as a</label>
 
+          {/* ROLE BUTTONS */}
           <div className="flex gap-4 mb-4">
-            <button className="btn btn-wide border-black">Coustomer</button>
-            <button className="btn btn-wide border-black">Provider</button>
+            <button
+              type="button"
+              className={`btn btn-wide border-black ${
+                form.role === "customer" ? "btn-active" : ""
+              }`}
+              onClick={() => setForm({ ...form, role: "customer" })}
+            >
+              Customer
+            </button>
+
+            <button
+              type="button"
+              className={`btn btn-wide border-black ${
+                form.role === "provider" ? "btn-active" : ""
+              }`}
+              onClick={() => setForm({ ...form, role: "provider" })}
+            >
+              Provider
+            </button>
           </div>
 
+          {/* NAME */}
           <div className="flex gap-4 mb-4">
             <div className="w-full">
               <label className="label">First Name</label>
-              <input type="text" className="input" placeholder="First Name" />
+              <input
+                name="firstName"
+                type="text"
+                className="input w-full"
+                placeholder="First Name"
+                onChange={handleChange}
+              />
             </div>
 
-            <div>
+            <div className="w-full">
               <label className="label">Last Name</label>
-              <input type="text" className="input" placeholder="Last Name" />
+              <input
+                name="lastName"
+                type="text"
+                className="input w-full"
+                placeholder="Last Name"
+                onChange={handleChange}
+              />
             </div>
           </div>
 
+          {/* EMAIL */}
           <label className="label">Email Address</label>
-          <input type="email" className="input w-full" placeholder="Enter Your Email" />
+          <input
+            name="email"
+            type="email"
+            className="input w-full"
+            placeholder="Enter Your Email"
+            onChange={handleChange}
+          />
 
+          {/* PASSWORD */}
           <label className="label">Password</label>
-          <input type="password" className="input w-full" placeholder="Create a Password" />
+          <input
+            name="password"
+            type="password"
+            className="input w-full"
+            placeholder="Create a Password"
+            onChange={handleChange}
+          />
 
-          <label className="label">Conform Password</label>
-          <input type="password" className="input w-full" placeholder="Comform Your Password" />
+          <label className="label">Confirm Password</label>
+          <input
+            name="confirmPassword"
+            type="password"
+            className="input w-full"
+            placeholder="Confirm Your Password"
+            onChange={handleChange}
+          />
 
           <br />
-          <br />
+
+          {/* TERMS */}
           <div className="flex gap-4">
-            <input type="checkbox" defaultChecked className="checkbox" />
-            <p>I agree to the <b>Terms and Conditions </b> and <b>Privacy Policy</b></p>
+            <input
+              type="checkbox"
+              className="checkbox"
+              defaultChecked
+              onChange={(e) =>
+                setForm({ ...form, agree: e.target.checked })
+              }
+            />
+            <p>
+              I agree to the <b>Terms and Conditions</b> and{" "}
+              <b>Privacy Policy</b>
+            </p>
           </div>
+
           <br />
 
-          <button className="btn btn-neutral mt-4 w-full "><a href="Login">Create Account</a></button>
+          {/* SUBMIT */}
+          <button
+            className="btn btn-neutral mt-4 w-full"
+            onClick={handleSignUp}
+          >
+            Create Account
+          </button>
 
           <div className="divider">Or SignUp with</div>
 
+          {/* SOCIAL (UI only) */}
           <div className="flex gap-24 w-full">
-            {/* Google */}
-            <button className="btn bg-white text-black border-[#e5e5e5] w-5/12">
-              <svg aria-label="Google logo" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><g><path d="m0 0H512V512H0" fill="#fff"></path><path fill="#34a853" d="M153 292c30 82 118 95 171 60h62v48A192 192 0 0190 341"></path><path fill="#4285f4" d="m386 400a140 175 0 0053-179H260v74h102q-7 37-38 57"></path><path fill="#fbbc02" d="m90 341a208 200 0 010-171l63 49q-12 37 0 73"></path><path fill="#ea4335" d="m153 219c22-69 116-109 179-50l55-54c-78-75-230-72-297 55"></path></g></svg>
+            <button className="btn bg-white text-black border w-5/12">
               Login with Google
             </button>
 
-            {/* Facebook */}
-            <button className="btn bg-[#1A77F2] text-white border-[#005fd8] w-5/12">
-              <svg aria-label="Facebook logo" width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><path fill="white" d="M8 12h5V8c0-6 4-7 11-6v5c-4 0-5 0-5 3v2h5l-1 6h-4v12h-6V18H8z"></path></svg>
+            <button className="btn bg-[#1A77F2] text-white w-5/12">
               Login with Facebook
-            </button> 
-            <br /> 
+            </button>
           </div>
+
           <br />
-          <p className="text-center"><u>Already have an account?   <b><a href="Login">  Login here</a></b></u></p>
+
+          <p className="text-center">
+            <u>
+              Already have an account?
+              <b>
+                <a href="/login"> Login here</a>
+              </b>
+            </u>
+          </p>
         </fieldset>
       </div>
     </main>
