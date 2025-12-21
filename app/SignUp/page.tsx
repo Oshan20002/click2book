@@ -48,7 +48,7 @@ export default function SignUp() {
 
     // 2️⃣ Insert user profile
     const { error: profileError } = await supabase.from("users").insert({
-      id: data.user.id,
+      id: data?.user?.id,
       first_name: form.firstName,
       last_name: form.lastName,
       email: form.email,
