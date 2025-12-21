@@ -70,7 +70,7 @@ export default function SignUp() {
         SignUp
       </h2>
 
-      <div className="w-1/3 mx-auto mt-5">
+      <div className="w-1/3 mx-auto mt-5 ">
         <fieldset className="fieldset bg-base-200 border-base-300 rounded-box border p-10">
           <label className="label text-xl">I want to join as a</label>
 
