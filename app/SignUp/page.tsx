@@ -23,7 +23,7 @@ export default function SignUp() {
 
   const handleSignUp = async () => {
     if (!form.agree) {
-      alert("You must agree to Terms & Conditions");
+      alert("You must agree to Terms and Conditions");
       return;
     }
 
