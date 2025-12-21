@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
+import { ChangeEvent } from "react";
 
 export default function Login() {
   const router = useRouter();
@@ -14,8 +15,8 @@ export default function Login() {
     remember: true,
   });
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleLogin = async () => {

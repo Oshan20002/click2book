@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
+import { ChangeEvent } from "react";
+
 
 export default function SignUp() {
   const router = useRouter();
@@ -17,9 +19,10 @@ export default function SignUp() {
     agree: true,
   });
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  setForm({ ...form, [e.target.name]: e.target.value });
+ };
+
 
   const handleSignUp = async () => {
     if (!form.agree) {
