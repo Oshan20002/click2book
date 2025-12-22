@@ -1,63 +1,50 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
 
-  const isActive = (path: string) => pathname === path;
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+    });
+
+    // Listen for auth changes
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/Login");
+  };
 
   return (
     <div className="navbar bg-base-100 shadow-sm p-3 pl-10 pr-10">
       <div className="navbar-start">
-        <div className="dropdown">
-          <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              {" "}
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h8m-8 6h16"
-              />{" "}
-            </svg>
-          </div>
-          <ul
-            tabIndex={-1}
-            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
-          >
-            <li>
-              <a>Item 1</a>
-            </li>
-            <li>
-              <a>Parent</a>
-              <ul className="p-2">
-                <li>
-                  <a>Submenu 1</a>
-                </li>
-                <li>
-                  <a>Submenu 2</a>
-                </li>
-              </ul>
-            </li>
-            <li>
-              <a>Item 3</a>
-            </li>
-          </ul>
-        </div>
-        <a className="btn btn-ghost text-xl font-bold">Click2Book</a>
+        <Link href="/" className="btn btn-ghost text-xl font-bold">
+          Click2Book
+        </Link>
       </div>
+
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1 gap-10 font-bold">
           <li>
-            <a href="Home">Home</a>
+            <Link href="/">Home</Link>
           </li>
           <li>
             <details>
@@ -73,21 +60,41 @@ export default function Navbar() {
             </details>
           </li>
           <li>
-            <a href="HowItWorks">How It Works</a>
+            <Link href="/HowItWorks">How It Works</Link>
           </li>
           <li>
-            <a href="About">About</a>
+            <Link href="/About">About</Link>
           </li>
         </ul>
       </div>
+
+      {user?.role === "provider" && (
+        <button className="btn btn-primary">Provider Dashboard</button>
+      )}
+
       <div className="navbar-end gap-5">
-        <a className="btn" href="Login">
-          Login
-        </a>
-        <a className="btn bg-slate-600 text-white" href="SignUp">
-          SignUp
-        </a>
+        {user ? (
+          <>
+            <p className="text-sm font-medium">{user.email}</p>
+            <button onClick={handleLogout} className="btn btn-error text-white">
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <Link href="/Login" className="btn">
+              Login
+            </Link>
+            <Link href="/SignUp" className="btn bg-slate-600 text-white">
+              SignUp
+            </Link>
+          </>
+        )}
       </div>
     </div>
   );
 }
+function setProfile(data: { role: any; } | null) {
+  throw new Error("Function not implemented.");
+}
+
