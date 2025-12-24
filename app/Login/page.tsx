@@ -50,29 +50,6 @@ export default function Login() {
 
       <div className="w-1/3 mx-auto mt-5">
         <fieldset className="fieldset bg-base-200 border-base-300 rounded-box border p-10">
-          <label className="label text-xl">I am a</label>
-
-          <div className="flex gap-4 mb-4">
-            <button
-              type="button"
-              className={`btn btn-wide border-black ${
-                form.role === "customer" ? "btn-active" : ""
-              }`}
-              onClick={() => setForm({ ...form, role: "customer" })}
-            >
-              Customer
-            </button>
-
-            <button
-              type="button"
-              className={`btn btn-wide border-black ${
-                form.role === "provider" ? "btn-active" : ""
-              }`}
-              onClick={() => setForm({ ...form, role: "provider" })}
-            >
-              Provider
-            </button>
-          </div>
 
           {/* EMAIL */}
           <label className="label">Email Address</label>

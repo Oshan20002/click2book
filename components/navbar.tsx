@@ -8,18 +8,27 @@ import { supabase } from "@/lib/supabaseClient";
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<any>(null); // Auth user
+  const [profile, setProfile] = useState<any>(null); // Data from users table
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       setUser(data.user);
+      if (data.user) {
+        await fetchUserProfile(data.user.id);
+      }
     });
 
     // Listen for auth changes
     const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      async (_event, session) => {
         setUser(session?.user ?? null);
+        if (session?.user) {
+          await fetchUserProfile(session.user.id);
+        } else {
+          setProfile(null);
+        }
       }
     );
 
@@ -27,6 +36,20 @@ export default function Navbar() {
       listener.subscription.unsubscribe();
     };
   }, []);
+
+  const fetchUserProfile = async (userId: string) => {
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching user profile:", error);
+    } else {
+      setProfile(data);
+    }
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -66,16 +89,16 @@ export default function Navbar() {
             <Link href="/About">About</Link>
           </li>
         </ul>
-      </div>
+      </div>  
 
-      {user?.role === "provider" && (
+      {profile?.role === "provider" && (
         <button className="btn btn-primary">Provider Dashboard</button>
       )}
 
-      <div className="navbar-end gap-5">
+      <div className="navbar-end gap-10">
         {user ? (
           <>
-            <p className="text-sm font-medium">{user.email}</p>
+            <p className="text-sm font-medium">{profile?.first_name + " " + profile?.last_name}</p>
             <button onClick={handleLogout} className="btn btn-error text-white">
               Logout
             </button>
@@ -94,7 +117,3 @@ export default function Navbar() {
     </div>
   );
 }
-function setProfile(data: { role: any; } | null) {
-  throw new Error("Function not implemented.");
-}
-
