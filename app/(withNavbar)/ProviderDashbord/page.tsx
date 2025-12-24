@@ -54,14 +54,14 @@ export default function ProviderDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full ml-28">
         <Link
-          href="/ProviderDashboard/RegisterService"
+          href="/RegisterService"
           className="btn btn-primary w-full text-lg"
         >
           Register New Service
         </Link>
 
         <Link
-          href="/provider/ManageAds"
+          href="/ManageAds"
           className="btn btn-accent w-full text-lg"
         >
           Manage Services
