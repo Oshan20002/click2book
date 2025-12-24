@@ -54,7 +54,7 @@ export default function ProviderDashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full ml-28">
         <Link
-          href="/provider/RegisterService"
+          href="/ProviderDashboard/RegisterService"
           className="btn btn-primary w-full text-lg"
         >
           Register New Service
