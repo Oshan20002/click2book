@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import ProviderDashboard from "@/app/(withNavbar)/ProviderDashbord/page";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -92,7 +93,7 @@ export default function Navbar() {
       </div>  
 
       {profile?.role === "provider" && (
-        <button className="btn btn-primary">Provider Dashboard</button>
+        <button className="btn btn-primary" onClick={() => router.push("/ProviderDashbord")}>Provider Dashboard</button>
       )}
 
       <div className="navbar-end gap-10">
