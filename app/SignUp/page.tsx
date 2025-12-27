@@ -21,7 +21,7 @@ export default function SignUp() {
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
   setForm({ ...form, [e.target.name]: e.target.value });
- };
+  };
 
 
   const handleSignUp = async () => {
