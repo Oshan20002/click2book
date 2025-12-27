@@ -201,7 +201,7 @@ export default function SignUp() {
             <u>
               Already have an account?
               <b>
-                <a href="/login"> Login here</a>
+                <a href="/Login"> Login here</a>
               </b>
             </u>
           </p>
