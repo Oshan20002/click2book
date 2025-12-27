@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
-import Link from "next/link";
 
 /* Category → Image Mapping */
 const categoryImages: Record<string, string> = {
@@ -31,109 +30,194 @@ export default function ServiceDetails() {
   const [ads, setAds] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [showAddAd, setShowAddAd] = useState(false);
+  const [showEditAd, setShowEditAd] = useState(false);
+
+  const [selectedAd, setSelectedAd] = useState<any>(null);
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
+
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    start_time: "",
+    end_time: "",
+    price: "",
+  });
+
+  /* ================= FETCH ================= */
+  const fetchData = async () => {
+    const { data: auth } = await supabase.auth.getUser();
+    if (!auth.user) return router.push("/Login");
+
+    const { data: serviceData } = await supabase
+      .from("services")
+      .select("*")
+      .eq("id", serviceId)
+      .single();
+
+    setService(serviceData);
+
+    const { data: adsData } = await supabase
+      .from("ads")
+      .select("*")
+      .eq("service_id", serviceId)
+      .order("created_at", { ascending: false });
+
+    setAds(adsData || []);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchService = async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        router.push("/Login");
-        return;
-      }
+    fetchData();
+  }, []);
 
-      const { data: serviceData } = await supabase
-        .from("services")
-        .select("*")
-        .eq("id", serviceId)
-        .single();
+  /* ================= UPLOAD IMAGE ================= */
+  const uploadBanner = async (): Promise<string | null> => {
+    if (!bannerFile) return null;
 
-      if (!serviceData) {
-        router.push("/provider-dashboard");
-        return;
-      }
+    const fileName = `ad-${Date.now()}-${bannerFile.name}`;
 
-      setService(serviceData);
+    const { error } = await supabase.storage
+      .from("ads-banners")
+      .upload(fileName, bannerFile);
 
-      const { data: adsData } = await supabase
-        .from("ads")
-        .select("*")
-        .eq("service_id", serviceId)
-        .eq("status", "active")
-        .order("created_at", { ascending: false });
+    if (error) {
+      alert(error.message);
+      return null;
+    }
 
-      setAds(adsData || []);
-      setLoading(false);
-    };
+    return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/ads-banners/${fileName}`;
+  };
 
-    fetchService();
-  }, [router, serviceId]);
+  /* ================= CREATE AD ================= */
+  const handleCreateAd = async () => {
+    const bannerUrl = await uploadBanner();
+
+    await supabase.from("ads").insert({
+      service_id: serviceId,
+      provider_id: (await supabase.auth.getUser()).data.user?.id,
+      title: form.title,
+      category: service.category,
+      description: form.description,
+      start_time: form.start_time,
+      end_time: form.end_time,
+      price: Number(form.price),
+      banner_url: bannerUrl,
+      status: "active",
+    });
+
+    setShowAddAd(false);
+    setBannerFile(null);
+    setForm({ title: "", description: "", start_time: "", end_time: "", price: "" });
+    fetchData();
+  };
+
+  /* ================= UPDATE AD ================= */
+  const handleUpdateAd = async () => {
+    const bannerUrl = bannerFile ? await uploadBanner() : selectedAd.banner_url;
+
+    await supabase
+      .from("ads")
+      .update({
+        title: form.title,
+        description: form.description,
+        start_time: form.start_time,
+        end_time: form.end_time,
+        price: Number(form.price),
+        banner_url: bannerUrl,
+      })
+      .eq("id", selectedAd.id);
+
+    setShowEditAd(false);
+    setSelectedAd(null);
+    fetchData();
+  };
 
   if (loading) return <p className="text-center mt-10">Loading...</p>;
 
   return (
     <div className="max-w-5xl mx-auto mt-10 p-6 border rounded-md shadow-md">
-      {/* CATEGORY IMAGE */}
-      <img
-        src={
-          categoryImages[service.category] ||
-          "/no-image.png"
-        }
-        alt={service.category}
-        className="w-full h-64 object-cover rounded-lg mb-6"
-      />
+      <img src={categoryImages[service.category]} className="w-full h-64 object-cover rounded mb-6" />
 
-      <h1 className="text-2xl font-bold mb-2">
-        {service.service_name}
-      </h1>
+      <h1 className="text-2xl font-bold">{service.service_name}</h1>
 
-      <p className="text-gray-600 mb-4">
-        {service.category}
-      </p>
+      <button className="btn btn-primary my-6" onClick={() => setShowAddAd(true)}>
+        Put New Ad
+      </button>
 
-      <p className="mb-6">{service.description}</p>
+      <h2 className="text-xl font-semibold mb-4">Current Ads</h2>
 
-      {/* Buttons */}
-      <div className="flex gap-6 mb-10">
-        <Link
-          href={`/provider/services/${service.id}/new-ad`}
-          className="btn btn-primary"
-        >
-          Put a New Ad
-        </Link>
-
-        <Link
-          href={`/provider/services/${service.id}/manage-ads`}
-          className="btn btn-accent"
-        >
-          Manage Ads
-        </Link>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {ads.map((ad) => (
+          <div key={ad.id} className="border rounded shadow">
+            {ad.banner_url && (
+              <img src={ad.banner_url} className="h-40 w-full object-cover rounded-t" />
+            )}
+            <div className="p-4">
+              <h3 className="font-bold">{ad.title}</h3>
+              <p>{ad.description}</p>
+              <button
+                className="btn btn-sm btn-outline mt-2"
+                onClick={() => {
+                  setSelectedAd(ad);
+                  setForm(ad);
+                  setShowEditAd(true);
+                }}
+              >
+                Edit
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* Active Ads */}
-      <h2 className="text-xl font-semibold mb-4">
-        Active Advertisements
-      </h2>
-
-      {ads.length === 0 ? (
-        <p className="text-gray-500">
-          No active ads yet.
-        </p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {ads.map((ad) => (
-            <div
-              key={ad.id}
-              className="border rounded-lg p-4 shadow"
-            >
-              <h3 className="font-bold text-lg">
-                {ad.title}
-              </h3>
-              <p className="text-sm text-gray-600 mb-2">
-                {ad.status.toUpperCase()}
-              </p>
-              <p className="text-sm">{ad.description}</p>
-            </div>
-          ))}
-        </div>
+      {/* ADD MODAL */}
+      {showAddAd && (
+        <Modal
+          title="New Ad"
+          onClose={() => setShowAddAd(false)}
+          onSave={handleCreateAd}
+          setForm={setForm}
+          setBannerFile={setBannerFile}
+          service={service}
+        />
       )}
+
+      {/* EDIT MODAL */}
+      {showEditAd && (
+        <Modal
+          title="Edit Ad"
+          onClose={() => setShowEditAd(false)}
+          onSave={handleUpdateAd}
+          setForm={setForm}
+          setBannerFile={setBannerFile}
+          service={service}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ================= MODAL COMPONENT ================= */
+function Modal({ title, onClose, onSave, setForm, setBannerFile, service }: any) {
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white p-6 rounded w-[450px]">
+        <h2 className="text-xl font-bold mb-4">{title}</h2>
+
+        <input className="input w-full mb-2" placeholder="Title" onChange={(e) => setForm((p:any)=>({...p,title:e.target.value}))}/>
+        <input className="input w-full mb-2" value={service.category} disabled />
+        <textarea className="textarea w-full mb-2" placeholder="Description" onChange={(e)=>setForm((p:any)=>({...p,description:e.target.value}))}/>
+        <input type="file" className="mb-2" onChange={(e)=>setBannerFile(e.target.files?.[0])}/>
+        <input type="datetime-local" className="input w-full mb-2" onChange={(e)=>setForm((p:any)=>({...p,start_time:e.target.value}))}/>
+        <input type="datetime-local" className="input w-full mb-2" onChange={(e)=>setForm((p:any)=>({...p,end_time:e.target.value}))}/>
+        <input type="number" className="input w-full mb-4" placeholder="Price" onChange={(e)=>setForm((p:any)=>({...p,price:e.target.value}))}/>
+
+        <div className="flex justify-end gap-4">
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" onClick={onSave}>Save</button>
+        </div>
+      </div>
     </div>
   );
 }
