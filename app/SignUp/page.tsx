@@ -21,7 +21,7 @@ export default function SignUp() {
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
   setForm({ ...form, [e.target.name]: e.target.value });
- };
+  };
 
 
   const handleSignUp = async () => {
@@ -60,8 +60,8 @@ export default function SignUp() {
       return;
     }
 
-    alert("Account created successfully!");
-    router.push("/login");
+    alert("Account created successfully!");add 
+    router.push("/Login");
   };
 
   return (
