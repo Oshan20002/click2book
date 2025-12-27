@@ -84,7 +84,7 @@ export default function ProviderDashboard() {
           Register New Service
         </Link>
 
-        <Link href="/ManageServeices" className="btn btn-accent">
+        <Link href="/ManageServices" className="btn btn-accent">
           Manage Services
         </Link>
       </div>

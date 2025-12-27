@@ -61,7 +61,7 @@ export default function SignUp() {
     }
 
     alert("Account created successfully!");
-    router.push("/Login");
+    router.push("/login");
   };
 
   return (
