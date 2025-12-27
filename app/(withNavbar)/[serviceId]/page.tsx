@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import Link from "next/link";
 
@@ -23,94 +23,113 @@ const categoryImages: Record<string, string> = {
     "https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/Images/tech.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZXMvdGVjaC5qcGciLCJpYXQiOjE3NjEyOTEyMTUsImV4cCI6MTc5MjgyNzIxNX0.D43Vo0-iFmL4SUS3rT1HQ4alKsLDBPkyYg1kzPbdkYI",
 };
 
-export default function ProviderDashboard() {
+export default function ServiceDetails() {
+  const { serviceId } = useParams();
   const router = useRouter();
-  const [profile, setProfile] = useState<any>(null);
-  const [services, setServices] = useState<any[]>([]);
+
+  const [service, setService] = useState<any>(null);
+  const [ads, setAds] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const { data } = await supabase.auth.getUser();
-
-      if (!data.user) {
+    const fetchService = async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) {
         router.push("/Login");
         return;
       }
 
-      const { data: profileData } = await supabase
-        .from("users")
+      const { data: serviceData } = await supabase
+        .from("services")
         .select("*")
-        .eq("id", data.user.id)
+        .eq("id", serviceId)
         .single();
 
-      if (!profileData || profileData.role !== "provider") {
-        router.push("/");
+      if (!serviceData) {
+        router.push("/provider-dashboard");
         return;
       }
 
-      setProfile(profileData);
+      setService(serviceData);
 
-      const { data: servicesData } = await supabase
-        .from("services")
+      const { data: adsData } = await supabase
+        .from("ads")
         .select("*")
-        .eq("provider_id", data.user.id)
+        .eq("service_id", serviceId)
+        .eq("status", "active")
         .order("created_at", { ascending: false });
 
-      setServices(servicesData || []);
+      setAds(adsData || []);
       setLoading(false);
     };
 
-    fetchData();
-  }, [router]);
+    fetchService();
+  }, [router, serviceId]);
 
   if (loading) return <p className="text-center mt-10">Loading...</p>;
 
   return (
-    <div className="max-w-6xl mx-auto mt-10 p-6 border rounded-md shadow-md">
-      <h1 className="text-2xl font-bold">Provider Dashboard</h1>
-      <p className="text-gray-600 mb-6">
-        Welcome, {profile.first_name} {profile.last_name}
+    <div className="max-w-5xl mx-auto mt-10 p-6 border rounded-md shadow-md">
+      {/* CATEGORY IMAGE */}
+      <img
+        src={
+          categoryImages[service.category] ||
+          "/no-image.png"
+        }
+        alt={service.category}
+        className="w-full h-64 object-cover rounded-lg mb-6"
+      />
+
+      <h1 className="text-2xl font-bold mb-2">
+        {service.service_name}
+      </h1>
+
+      <p className="text-gray-600 mb-4">
+        {service.category}
       </p>
 
+      <p className="mb-6">{service.description}</p>
+
+      {/* Buttons */}
       <div className="flex gap-6 mb-10">
-        <Link href="/RegisterService" className="btn btn-primary">
-          Register New Service
+        <Link
+          href={`/provider/services/${service.id}/new-ad`}
+          className="btn btn-primary"
+        >
+          Put a New Ad
         </Link>
-        <Link href="/ManageServices" className="btn btn-accent">
-          Manage Services
+
+        <Link
+          href={`/provider/services/${service.id}/manage-ads`}
+          className="btn btn-accent"
+        >
+          Manage Ads
         </Link>
       </div>
 
-      <h2 className="text-xl font-semibold mb-4">Your Services</h2>
+      {/* Active Ads */}
+      <h2 className="text-xl font-semibold mb-4">
+        Active Advertisements
+      </h2>
 
-      {services.length === 0 ? (
-        <p className="text-gray-500">No services registered.</p>
+      {ads.length === 0 ? (
+        <p className="text-gray-500">
+          No active ads yet.
+        </p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {services.map((service) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {ads.map((ad) => (
             <div
-              key={service.id}
-              onClick={() =>
-                router.push(`/${service.id}`)
-              }
-              className="cursor-pointer border rounded-lg overflow-hidden shadow hover:shadow-lg transition"
+              key={ad.id}
+              className="border rounded-lg p-4 shadow"
             >
-              <img
-                src={categoryImages[service.category]}
-                className="h-40 w-full object-cover"
-              />
-              <div className="p-4">
-                <h3 className="font-bold text-lg">
-                  {service.service_name}
-                </h3>
-                <p className="text-sm text-gray-600">
-                  {service.category}
-                </p>
-                <p className="text-sm mt-1">
-                  {service.description}
-                </p>
-              </div>
+              <h3 className="font-bold text-lg">
+                {ad.title}
+              </h3>
+              <p className="text-sm text-gray-600 mb-2">
+                {ad.status.toUpperCase()}
+              </p>
+              <p className="text-sm">{ad.description}</p>
             </div>
           ))}
         </div>
