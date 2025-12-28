@@ -30,9 +30,8 @@ export default function ServiceDetails() {
   const [ads, setAds] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [showAddAd, setShowAddAd] = useState(false);
-  const [showEditAd, setShowEditAd] = useState(false);
-
+  const [showAdd, setShowAdd] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
   const [selectedAd, setSelectedAd] = useState<any>(null);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
 
@@ -42,9 +41,10 @@ export default function ServiceDetails() {
     start_time: "",
     end_time: "",
     price: "",
+    slot_duration: "",
   });
 
-  /* ================= FETCH ================= */
+  /* ================= FETCH DATA ================= */
   const fetchData = async () => {
     const { data: auth } = await supabase.auth.getUser();
     if (!auth.user) return router.push("/Login");
@@ -55,14 +55,13 @@ export default function ServiceDetails() {
       .eq("id", serviceId)
       .single();
 
-    setService(serviceData);
-
     const { data: adsData } = await supabase
       .from("ads")
       .select("*")
       .eq("service_id", serviceId)
       .order("created_at", { ascending: false });
 
+    setService(serviceData);
     setAds(adsData || []);
     setLoading(false);
   };
@@ -71,12 +70,11 @@ export default function ServiceDetails() {
     fetchData();
   }, []);
 
-  /* ================= UPLOAD IMAGE ================= */
-  const uploadBanner = async (): Promise<string | null> => {
+  /* ================= IMAGE UPLOAD ================= */
+  const uploadBanner = async () => {
     if (!bannerFile) return null;
 
     const fileName = `ad-${Date.now()}-${bannerFile.name}`;
-
     const { error } = await supabase.storage
       .from("ads-banners")
       .upload(fileName, bannerFile);
@@ -89,129 +87,194 @@ export default function ServiceDetails() {
     return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/ads-banners/${fileName}`;
   };
 
-  /* ================= CREATE AD ================= */
-  const handleCreateAd = async () => {
-    const bannerUrl = await uploadBanner();
+  /* ================= CREATE ================= */
+  const handleCreate = async () => {
+    const banner_url = await uploadBanner();
+    const user = (await supabase.auth.getUser()).data.user;
 
     await supabase.from("ads").insert({
       service_id: serviceId,
-      provider_id: (await supabase.auth.getUser()).data.user?.id,
+      provider_id: user?.id,
       title: form.title,
-      category: service.category,
       description: form.description,
+      category: service.category,
       start_time: form.start_time,
       end_time: form.end_time,
       price: Number(form.price),
-      banner_url: bannerUrl,
+      slot_duration: Number(form.slot_duration),
+      banner_url,
       status: "active",
     });
 
-    setShowAddAd(false);
-    setBannerFile(null);
-    setForm({ title: "", description: "", start_time: "", end_time: "", price: "" });
+    reset();
     fetchData();
   };
 
-  /* ================= UPDATE AD ================= */
-  const handleUpdateAd = async () => {
-    const bannerUrl = bannerFile ? await uploadBanner() : selectedAd.banner_url;
+  /* ================= UPDATE ================= */
+  const handleUpdate = async () => {
+    const banner_url = bannerFile
+      ? await uploadBanner()
+      : selectedAd.banner_url;
 
     await supabase
       .from("ads")
       .update({
-        title: form.title,
-        description: form.description,
-        start_time: form.start_time,
-        end_time: form.end_time,
+        ...form,
         price: Number(form.price),
-        banner_url: bannerUrl,
+        slot_duration: Number(form.slot_duration),
+        banner_url,
       })
       .eq("id", selectedAd.id);
 
-    setShowEditAd(false);
-    setSelectedAd(null);
+    reset();
     fetchData();
+  };
+
+  /* ================= DELETE ================= */
+  const handleDelete = async (ad: any) => {
+    if (!confirm("Delete this ad?")) return;
+
+    if (ad.banner_url) {
+      const path = ad.banner_url.split("/ads-banners/")[1];
+      await supabase.storage.from("ads-banners").remove([path]);
+    }
+
+    await supabase.from("ads").delete().eq("id", ad.id);
+    fetchData();
+  };
+
+  const reset = () => {
+    setShowAdd(false);
+    setShowEdit(false);
+    setSelectedAd(null);
+    setBannerFile(null);
+    setForm({
+      title: "",
+      description: "",
+      start_time: "",
+      end_time: "",
+      price: "",
+      slot_duration: "",
+    });
   };
 
   if (loading) return <p className="text-center mt-10">Loading...</p>;
 
   return (
-    <div className="max-w-5xl mx-auto mt-10 p-6 border rounded-md shadow-md">
-      <img src={categoryImages[service.category]} className="w-full h-64 object-cover rounded mb-6" />
+    <div className="max-w-6xl mx-auto p-6">
+      <img
+        src={categoryImages[service.category]}
+        className="w-full h-64 object-cover rounded mb-6"
+      />
 
-      <h1 className="text-2xl font-bold">{service.service_name}</h1>
-
-      <button className="btn btn-primary my-6" onClick={() => setShowAddAd(true)}>
-        Put New Ad
-      </button>
-
-      <h2 className="text-xl font-semibold mb-4">Current Ads</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">{service.service_name}</h1>
+        <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
+          + New Ad
+        </button>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {ads.map((ad) => (
           <div key={ad.id} className="border rounded shadow">
             {ad.banner_url && (
-              <img src={ad.banner_url} className="h-40 w-full object-cover rounded-t" />
+              <img src={ad.banner_url} className="h-40 w-full object-cover" />
             )}
             <div className="p-4">
               <h3 className="font-bold">{ad.title}</h3>
               <p>{ad.description}</p>
-              <button
-                className="btn btn-sm btn-outline mt-2"
-                onClick={() => {
-                  setSelectedAd(ad);
-                  setForm(ad);
-                  setShowEditAd(true);
-                }}
-              >
-                Edit
-              </button>
+              <p className="text-sm mt-1">Price: Rs {ad.price}</p>
+              <p className="text-sm">
+                Slot Duration: {ad.slot_duration} minutes
+              </p>
+              <p className="text-sm">
+                {ad.start_time} → {ad.end_time}
+              </p>
+
+              <div className="flex gap-2 mt-3">
+                <button
+                  className="btn btn-sm btn-outline"
+                  onClick={() => {
+                    setSelectedAd(ad);
+                    setForm(ad);
+                    setShowEdit(true);
+                  }}
+                >
+                  Edit
+                </button>
+                <button
+                  className="btn btn-sm btn-error"
+                  onClick={() => handleDelete(ad)}
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* ADD MODAL */}
-      {showAddAd && (
+      {(showAdd || showEdit) && (
         <Modal
-          title="New Ad"
-          onClose={() => setShowAddAd(false)}
-          onSave={handleCreateAd}
+          title={showAdd ? "New Advertisement" : "Edit Advertisement"}
+          form={form}
           setForm={setForm}
           setBannerFile={setBannerFile}
-          service={service}
-        />
-      )}
-
-      {/* EDIT MODAL */}
-      {showEditAd && (
-        <Modal
-          title="Edit Ad"
-          onClose={() => setShowEditAd(false)}
-          onSave={handleUpdateAd}
-          setForm={setForm}
-          setBannerFile={setBannerFile}
-          service={service}
+          category={service.category}
+          onClose={reset}
+          onSave={showAdd ? handleCreate : handleUpdate}
         />
       )}
     </div>
   );
 }
 
-/* ================= MODAL COMPONENT ================= */
-function Modal({ title, onClose, onSave, setForm, setBannerFile, service }: any) {
+/* ================= MODAL ================= */
+function Modal({
+  title,
+  form,
+  setForm,
+  setBannerFile,
+  category,
+  onClose,
+  onSave,
+}: any) {
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded w-[450px]">
         <h2 className="text-xl font-bold mb-4">{title}</h2>
 
-        <input className="input w-full mb-2" placeholder="Title" onChange={(e) => setForm((p:any)=>({...p,title:e.target.value}))}/>
-        <input className="input w-full mb-2" value={service.category} disabled />
-        <textarea className="textarea w-full mb-2" placeholder="Description" onChange={(e)=>setForm((p:any)=>({...p,description:e.target.value}))}/>
-        <input type="file" className="mb-2" onChange={(e)=>setBannerFile(e.target.files?.[0])}/>
-        <input type="datetime-local" className="input w-full mb-2" onChange={(e)=>setForm((p:any)=>({...p,start_time:e.target.value}))}/>
-        <input type="datetime-local" className="input w-full mb-2" onChange={(e)=>setForm((p:any)=>({...p,end_time:e.target.value}))}/>
-        <input type="number" className="input w-full mb-4" placeholder="Price" onChange={(e)=>setForm((p:any)=>({...p,price:e.target.value}))}/>
+        <input className="input w-full mb-2" placeholder="Title"
+          value={form.title}
+          onChange={(e) => setForm({ ...form, title: e.target.value })} />
+
+        <input className="input w-full mb-2" value={category} disabled />
+
+        <textarea className="textarea w-full mb-2" placeholder="Description"
+          value={form.description}
+          onChange={(e) => setForm({ ...form, description: e.target.value })} />
+
+        <input type="file" className="mb-2"
+          onChange={(e) => setBannerFile(e.target.files?.[0])} />
+
+        <input type="datetime-local" className="input w-full mb-2"
+          value={form.start_time}
+          onChange={(e) => setForm({ ...form, start_time: e.target.value })} />
+
+        <input type="datetime-local" className="input w-full mb-2"
+          value={form.end_time}
+          onChange={(e) => setForm({ ...form, end_time: e.target.value })} />
+
+        <input type="number" className="input w-full mb-2" placeholder="Price"
+          value={form.price}
+          onChange={(e) => setForm({ ...form, price: e.target.value })} />
+
+        <input type="number" className="input w-full mb-4"
+          placeholder="Slot duration (minutes)"
+          value={form.slot_duration}
+          onChange={(e) =>
+            setForm({ ...form, slot_duration: e.target.value })
+          } />
 
         <div className="flex justify-end gap-4">
           <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
