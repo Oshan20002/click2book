@@ -22,8 +22,6 @@ const categoryImages: Record<string, string> = {
   "Technology & IT":
     "https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/Images/tech.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZXMvdGVjaC5qcGciLCJpYXQiOjE3NjEyOTEyMTUsImV4cCI6MTc5MjgyNzIxNX0.D43Vo0-iFmL4SUS3rT1HQ4alKsLDBPkyYg1kzPbdkYI",
 };
-
-
 /* ================= TYPES ================= */
 interface Service {
   id: string;
@@ -219,7 +217,16 @@ export default function ServiceDetails() {
 
               <div className="flex gap-2 mt-3">
                 <button className="btn btn-sm btn-outline"
-                  onClick={() => { setSelectedAd(ad); setForm({...ad, start_period: ad.slot_start_time.split(' ')[1] || 'AM'}); setShowEdit(true); }}>
+                  onClick={() => {
+                    setSelectedAd(ad);
+                    setForm({
+                      ...ad,
+                      start_period: ad.slot_start_time.split(" ")[1] || "AM",
+                      slot_duration: ad.slot_duration.toString(),
+                      price: ad.price.toString(),
+                    });
+                    setShowEdit(true);
+                  }}>
                   Edit
                 </button>
                 <button className="btn btn-sm btn-error" onClick={() => handleDelete(ad)}>Delete</button>
