@@ -189,6 +189,23 @@ export default function ServiceDetails() {
       })
       .eq("id", selectedAd?.id);
 
+    if (selectedAd) {
+      // remove old services
+      await supabase.from("ad_services").delete().eq("ad_id", selectedAd.id);
+
+      // insert updated services
+      await supabase.from("ad_services").insert(
+        moreServices
+          .filter((s) => s.service_name)
+          .map((s) => ({
+            ad_id: selectedAd.id,
+            service_name: s.service_name,
+            price: Number(s.price),
+            duration: Number(s.duration),
+          }))
+      );
+    }
+
     reset();
     fetchData();
   };
@@ -265,14 +282,32 @@ export default function ServiceDetails() {
               <div className="flex gap-2 mt-3">
                 <button
                   className="btn btn-sm btn-outline"
-                  onClick={() => {
+                  onClick={async () => {
                     setSelectedAd(ad);
+
                     setForm({
                       ...ad,
                       start_period: ad.slot_start_time.split(" ")[1] || "AM",
                       slot_duration: ad.slot_duration.toString(),
                       price: ad.price.toString(),
                     });
+
+                    // ✅ LOAD EXISTING SERVICES
+                    const { data } = await supabase
+                      .from("ad_services")
+                      .select("service_name, price, duration")
+                      .eq("ad_id", ad.id);
+
+                    setMoreServices(
+                      data && data.length > 0
+                        ? data.map((s) => ({
+                            service_name: s.service_name,
+                            price: s.price.toString(),
+                            duration: s.duration.toString(),
+                          }))
+                        : [{ service_name: "", price: "", duration: "" }]
+                    );
+
                     setShowEdit(true);
                   }}
                 >
@@ -324,7 +359,6 @@ interface ModalProps {
     >
   >;
 }
-
 
 function Modal({
   title,
