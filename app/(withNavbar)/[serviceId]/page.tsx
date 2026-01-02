@@ -42,6 +42,12 @@ interface Ad {
   banner_url?: string;
 }
 
+interface AdService {
+  service_name: string;
+  price: string;
+  duration: string;
+}
+
 /* ================= MAIN COMPONENT ================= */
 export default function ServiceDetails() {
   const { serviceId } = useParams();
@@ -67,6 +73,11 @@ export default function ServiceDetails() {
     number_of_slots: 1,
     price: "",
   });
+
+  /* ================= MORE SERVICES ================= */
+  const [moreServices, setMoreServices] = useState<
+    { service_name: string; price: string; duration: string }[]
+  >([{ service_name: "", price: "", duration: "" }]);
 
   /* ================= FETCH DATA ================= */
   const fetchData = async () => {
@@ -100,14 +111,18 @@ export default function ServiceDetails() {
     if (!bannerFile) return null;
 
     const fileName = `ad-${Date.now()}-${bannerFile.name}`;
-    const { error } = await supabase.storage.from("ads-banners").upload(fileName, bannerFile);
+    const { error } = await supabase.storage
+      .from("ads-banners")
+      .upload(fileName, bannerFile);
 
     if (error) {
       alert(error.message);
       return null;
     }
 
-    const { data } = supabase.storage.from("ads-banners").getPublicUrl(fileName);
+    const { data } = supabase.storage
+      .from("ads-banners")
+      .getPublicUrl(fileName);
     return data.publicUrl;
   };
 
@@ -116,21 +131,38 @@ export default function ServiceDetails() {
     const banner_url = await uploadBanner();
     const user = (await supabase.auth.getUser()).data.user;
 
-    await supabase.from("ads").insert({
-      service_id: serviceId,
-      provider_id: user?.id,
-      title: form.title,
-      description: form.description,
-      category: service?.category,
-      ad_start_time: form.ad_start_time,
-      ad_end_time: form.ad_end_time,
-      slot_start_time: `${form.slot_start_time} ${form.start_period}`,
-      slot_duration: Number(form.slot_duration) || 0,
-      number_of_slots: Number(form.number_of_slots) || 1,
-      price: Number(form.price) || 0,
-      banner_url,
-      status: "active",
-    });
+    const { data: ad, error } = await supabase
+      .from("ads")
+      .insert({
+        service_id: serviceId,
+        provider_id: user?.id,
+        title: form.title,
+        description: form.description,
+        category: service?.category,
+        ad_start_time: form.ad_start_time,
+        ad_end_time: form.ad_end_time,
+        slot_start_time: `${form.slot_start_time} ${form.start_period}`,
+        slot_duration: Number(form.slot_duration) || 0,
+        number_of_slots: Number(form.number_of_slots) || 1,
+        price: Number(form.price) || 0,
+        banner_url,
+        status: "active",
+      })
+      .select()
+      .single();
+
+    if (ad) {
+      await supabase.from("ad_services").insert(
+        moreServices
+          .filter((s) => s.service_name)
+          .map((s) => ({
+            ad_id: ad.id,
+            service_name: s.service_name,
+            price: Number(s.price),
+            duration: Number(s.duration),
+          }))
+      );
+    }
 
     reset();
     fetchData();
@@ -138,19 +170,24 @@ export default function ServiceDetails() {
 
   /* ================= UPDATE ================= */
   const handleUpdate = async () => {
-    const banner_url = bannerFile ? await uploadBanner() : selectedAd?.banner_url;
+    const banner_url = bannerFile
+      ? await uploadBanner()
+      : selectedAd?.banner_url;
 
-    await supabase.from("ads").update({
-      title: form.title,
-      description: form.description,
-      ad_start_time: form.ad_start_time,
-      ad_end_time: form.ad_end_time,
-      slot_start_time: `${form.slot_start_time} ${form.start_period}`,
-      slot_duration: Number(form.slot_duration) || 0,
-      number_of_slots: Number(form.number_of_slots) || 1,
-      price: Number(form.price) || 0,
-      banner_url,
-    }).eq("id", selectedAd?.id);
+    await supabase
+      .from("ads")
+      .update({
+        title: form.title,
+        description: form.description,
+        ad_start_time: form.ad_start_time,
+        ad_end_time: form.ad_end_time,
+        slot_start_time: `${form.slot_start_time} ${form.start_period}`,
+        slot_duration: Number(form.slot_duration) || 0,
+        number_of_slots: Number(form.number_of_slots) || 1,
+        price: Number(form.price) || 0,
+        banner_url,
+      })
+      .eq("id", selectedAd?.id);
 
     reset();
     fetchData();
@@ -185,6 +222,8 @@ export default function ServiceDetails() {
       number_of_slots: 1,
       price: "",
     });
+
+    setMoreServices([{ service_name: "", price: "", duration: "" }]);
   };
 
   if (loading) return <p className="text-center mt-10">Loading...</p>;
@@ -199,24 +238,33 @@ export default function ServiceDetails() {
 
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">{service?.service_name}</h1>
-        <button className="btn btn-primary" onClick={() => setShowAdd(true)}>+ New Ad</button>
+        <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
+          + New Ad
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {ads.map((ad) => (
           <div key={ad.id} className="border rounded shadow">
-            {ad.banner_url && <img src={ad.banner_url} className="h-40 w-full object-cover" />}
+            {ad.banner_url && (
+              <img src={ad.banner_url} className="h-40 w-full object-cover" />
+            )}
             <div className="p-4">
               <h3 className="font-bold">{ad.title}</h3>
               <p>{ad.description}</p>
               <p className="text-sm mt-1">Price: Rs {ad.price}</p>
-              <p className="text-sm">Slot Duration: {ad.slot_duration} minutes</p>
-              <p className="text-sm">Ad Time: {ad.ad_start_time} → {ad.ad_end_time}</p>
+              <p className="text-sm">
+                Slot Duration: {ad.slot_duration} minutes
+              </p>
+              <p className="text-sm">
+                Ad Time: {ad.ad_start_time} → {ad.ad_end_time}
+              </p>
               <p className="text-sm">Slot Start: {ad.slot_start_time}</p>
               <p className="text-sm">Number of Slots: {ad.number_of_slots}</p>
 
               <div className="flex gap-2 mt-3">
-                <button className="btn btn-sm btn-outline"
+                <button
+                  className="btn btn-sm btn-outline"
                   onClick={() => {
                     setSelectedAd(ad);
                     setForm({
@@ -226,10 +274,16 @@ export default function ServiceDetails() {
                       price: ad.price.toString(),
                     });
                     setShowEdit(true);
-                  }}>
+                  }}
+                >
                   Edit
                 </button>
-                <button className="btn btn-sm btn-error" onClick={() => handleDelete(ad)}>Delete</button>
+                <button
+                  className="btn btn-sm btn-error"
+                  onClick={() => handleDelete(ad)}
+                >
+                  Delete
+                </button>
               </div>
             </div>
           </div>
@@ -245,6 +299,8 @@ export default function ServiceDetails() {
           category={service?.category || ""}
           onClose={reset}
           onSave={showAdd ? handleCreate : handleUpdate}
+          moreServices={moreServices}
+          setMoreServices={setMoreServices}
         />
       )}
     </div>
@@ -260,62 +316,180 @@ interface ModalProps {
   category: string;
   onClose: () => void;
   onSave: () => void;
+
+  moreServices: { service_name: string; price: string; duration: string }[];
+  setMoreServices: React.Dispatch<
+    React.SetStateAction<
+      { service_name: string; price: string; duration: string }[]
+    >
+  >;
 }
 
-function Modal({ title, form, setForm, setBannerFile, category, onClose, onSave }: ModalProps) {
+
+function Modal({
+  title,
+  form,
+  setForm,
+  setBannerFile,
+  category,
+  onClose,
+  onSave,
+  moreServices,
+  setMoreServices,
+}: ModalProps) {
   return (
     <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded w-[450px] max-h-[90vh] overflow-y-auto">
         <h2 className="text-xl font-bold mb-4">{title}</h2>
 
         <label>Title</label>
-        <input className="input w-full mb-2" placeholder="Title"
-          value={form.title} onChange={(e) => setForm({...form, title: e.target.value})} />
+        <input
+          className="input w-full mb-2"
+          placeholder="Title"
+          value={form.title}
+          onChange={(e) => setForm({ ...form, title: e.target.value })}
+        />
 
         <label>Category</label>
         <input className="input w-full mb-2" value={category} disabled />
 
         <label>Description</label>
-        <textarea className="textarea w-full mb-2" placeholder="Description"
-          value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} />
+        <textarea
+          className="textarea w-full mb-2"
+          placeholder="Description"
+          value={form.description}
+          onChange={(e) => setForm({ ...form, description: e.target.value })}
+        />
 
         <label>Ad Banner</label>
-        <input type="file" className="mb-2" onChange={(e) => setBannerFile(e.target.files?.[0] || null)} />
+        <input
+          type="file"
+          className="mb-2"
+          onChange={(e) => setBannerFile(e.target.files?.[0] || null)}
+        />
 
         <label>AD Start Time</label>
-        <input type="datetime-local" className="input w-full mb-2"
-          value={form.ad_start_time} onChange={(e) => setForm({...form, ad_start_time: e.target.value})} />
+        <input
+          type="datetime-local"
+          className="input w-full mb-2"
+          value={form.ad_start_time}
+          onChange={(e) => setForm({ ...form, ad_start_time: e.target.value })}
+        />
 
         <label>AD End Time</label>
-        <input type="datetime-local" className="input w-full mb-2"
-          value={form.ad_end_time} onChange={(e) => setForm({...form, ad_end_time: e.target.value})} />
+        <input
+          type="datetime-local"
+          className="input w-full mb-2"
+          value={form.ad_end_time}
+          onChange={(e) => setForm({ ...form, ad_end_time: e.target.value })}
+        />
 
         <label>Slot Start Time</label>
         <div className="flex gap-2 mb-2">
-          <input type="time" className="input w-32"
-            value={form.slot_start_time} onChange={(e) => setForm({...form, slot_start_time: e.target.value})} />
-          <select className="input w-24"
-            value={form.start_period} onChange={(e) => setForm({...form, start_period: e.target.value})}>
+          <input
+            type="time"
+            className="input w-32"
+            value={form.slot_start_time}
+            onChange={(e) =>
+              setForm({ ...form, slot_start_time: e.target.value })
+            }
+          />
+          <select
+            className="input w-24"
+            value={form.start_period}
+            onChange={(e) => setForm({ ...form, start_period: e.target.value })}
+          >
             <option>AM</option>
             <option>PM</option>
           </select>
         </div>
 
         <label>Number of Slots</label>
-        <input type="number" min={1} className="input w-full mb-2"
-          value={form.number_of_slots} onChange={(e) => setForm({...form, number_of_slots: Number(e.target.value)})} />
+        <input
+          type="number"
+          min={1}
+          className="input w-full mb-2"
+          value={form.number_of_slots}
+          onChange={(e) =>
+            setForm({ ...form, number_of_slots: Number(e.target.value) })
+          }
+        />
 
         <label>Slot Duration (minutes)</label>
-        <input type="number" className="input w-full mb-2"
-          value={form.slot_duration} onChange={(e) => setForm({...form, slot_duration: e.target.value})} />
+        <input
+          type="number"
+          className="input w-full mb-2"
+          value={form.slot_duration}
+          onChange={(e) => setForm({ ...form, slot_duration: e.target.value })}
+        />
 
         <label>Price (Rs)</label>
-        <input type="number" className="input w-full mb-4"
-          value={form.price} onChange={(e) => setForm({...form, price: e.target.value})} />
+        <input
+          type="number"
+          className="input w-full mb-4"
+          value={form.price}
+          onChange={(e) => setForm({ ...form, price: e.target.value })}
+        />
+
+        <hr className="my-4" />
+        <h3 className="font-semibold mb-2">More Services</h3>
+
+        {moreServices.map((s, index) => (
+          <div key={index} className="grid grid-cols-3 gap-2 mb-2">
+            <input
+              className="input input-sm"
+              placeholder="Service Name"
+              value={s.service_name}
+              onChange={(e) => {
+                const copy = [...moreServices];
+                copy[index].service_name = e.target.value;
+                setMoreServices(copy);
+              }}
+            />
+            <input
+              type="number"
+              className="input input-sm"
+              placeholder="Price"
+              value={s.price}
+              onChange={(e) => {
+                const copy = [...moreServices];
+                copy[index].price = e.target.value;
+                setMoreServices(copy);
+              }}
+            />
+            <input
+              type="number"
+              className="input input-sm"
+              placeholder="Duration (min)"
+              value={s.duration}
+              onChange={(e) => {
+                const copy = [...moreServices];
+                copy[index].duration = e.target.value;
+                setMoreServices(copy);
+              }}
+            />
+          </div>
+        ))}
+
+        <button
+          className="btn btn-outline w-full mb-4"
+          onClick={() =>
+            setMoreServices([
+              ...moreServices,
+              { service_name: "", price: "", duration: "" },
+            ])
+          }
+        >
+          + Add More Services
+        </button>
 
         <div className="flex justify-end gap-4">
-          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
-          <button className="btn btn-primary" onClick={onSave}>Save</button>
+          <button className="btn btn-ghost" onClick={onClose}>
+            Cancel
+          </button>
+          <button className="btn btn-primary" onClick={onSave}>
+            Save
+          </button>
         </div>
       </div>
     </div>
