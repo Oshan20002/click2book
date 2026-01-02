@@ -17,7 +17,7 @@ export default function Home() {
           Book Any Service
         </h1>
         <h2 className="text-6xl text-center font-bold mt-5 text-slate-600">
-          In One Place
+          Anytime, Anywhere
         </h2>
         <p className="text-2xl text-center max-w-4xl mx-auto mt-8">
           Connect with trusted service providers across Sri Lanka.
