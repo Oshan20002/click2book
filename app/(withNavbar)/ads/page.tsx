@@ -1,10 +1,11 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
 type Ad = {
+  price: ReactNode;
   id: string;
   title: string;
   category: string;
@@ -67,13 +68,14 @@ export default function AdsPage() {
             )}
             <div className="card-body">
               <h2 className="card-title">{ad.title}</h2>
+              <h2 className="card-title">RS. {ad.price}.00</h2>
               <p className="text-sm text-gray-800">{ad.category}</p>
               <p className="text-sm text-gray-500">{ad.description}</p>
               <p className="text-sm text-green-600 font-semibold">
                 Slots: {ad.number_of_slots} {/* Directly from table */}
               </p>
               <div className="card-actions justify-end">
-                <button className="btn btn-primary">Contact Provider</button>
+                <button className="btn btn-primary">Set a Booking</button>
               </div>
             </div>
           </div>
