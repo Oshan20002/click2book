@@ -371,6 +371,38 @@ function Modal({
   moreServices,
   setMoreServices,
 }: ModalProps) {
+  const calculateSlotEndTime = () => {
+    if (!form.slot_start_time || !form.slot_duration || !form.number_of_slots) {
+      return "";
+    }
+
+    const [hours, minutes] = form.slot_start_time.split(":").map(Number);
+
+    let startHours = hours;
+
+    // Convert AM/PM to 24-hour format
+    if (form.start_period === "PM" && hours !== 12) startHours += 12;
+    if (form.start_period === "AM" && hours === 12) startHours = 0;
+
+    const startDate = new Date();
+    startDate.setHours(startHours, minutes, 0, 0);
+
+    const totalMinutes =
+      Number(form.slot_duration) * Number(form.number_of_slots);
+
+    const endDate = new Date(startDate.getTime() + totalMinutes * 60000);
+
+    let endHours = endDate.getHours();
+    const endMinutes = endDate.getMinutes();
+
+    const endPeriod = endHours >= 12 ? "PM" : "AM";
+    endHours = endHours % 12 || 12;
+
+    return `${endHours.toString().padStart(2, "0")}:${endMinutes
+      .toString()
+      .padStart(2, "0")} ${endPeriod}`;
+  };
+
   return (
     <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded w-[450px] max-h-[90vh] overflow-y-auto">
@@ -456,6 +488,13 @@ function Modal({
           value={form.slot_duration}
           onChange={(e) => setForm({ ...form, slot_duration: e.target.value })}
         />
+
+        {calculateSlotEndTime() && (
+          <p className="text-sm text-gray-600 mb-3">
+            Slot End Time:{" "}
+            <span className="font-semibold">{calculateSlotEndTime()}</span>
+          </p>
+        )}
 
         <label>Price (Rs)</label>
         <input
