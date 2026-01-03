@@ -371,6 +371,76 @@ function Modal({
   moreServices,
   setMoreServices,
 }: ModalProps) {
+  const [breakTimes, setBreakTimes] = useState<
+    { start: string; end: string }[]
+  >([{ start: "", end: "" }]);
+
+  //Convert time + AM/PM → minutes
+  const timeToMinutes = (time: string, period: string) => {
+    const [h, m] = time.split(":").map(Number);
+    let hours = h;
+
+    // Check if time is within break times
+    const isInBreak = (time: number) => {
+      return breakTimes.some((b) => {
+        if (!b.start || !b.end) return false;
+
+        const start = timeToMinutes(b.start, form.start_period);
+        const end = timeToMinutes(b.end, form.start_period);
+
+        return time >= start && time < end;
+      });
+    };
+
+    //Calculate Slot End Time
+    const calculateSlotEndTime = () => {
+      if (
+        !form.slot_start_time ||
+        !form.slot_duration ||
+        !form.number_of_slots
+      ) {
+        return "";
+      }
+
+      let currentTime = timeToMinutes(form.slot_start_time, form.start_period);
+
+      let createdSlots = 0;
+
+      while (createdSlots < Number(form.number_of_slots)) {
+        if (!isInBreak(currentTime)) {
+          createdSlots++;
+          currentTime += Number(form.slot_duration);
+        } else {
+          // ⏭ Skip break
+          const activeBreak = breakTimes.find((b) => {
+            if (!b.start || !b.end) return false;
+            const start = timeToMinutes(b.start, form.start_period);
+            const end = timeToMinutes(b.end, form.start_period);
+            return currentTime >= start && currentTime < end;
+          });
+
+          if (activeBreak) {
+            currentTime = timeToMinutes(activeBreak.end, form.start_period);
+          }
+        }
+      }
+
+      const hours = Math.floor(currentTime / 60);
+      const minutes = currentTime % 60;
+      const period = hours >= 12 ? "PM" : "AM";
+      const displayHour = hours % 12 || 12;
+
+      return `${displayHour.toString().padStart(2, "0")}:${minutes
+        .toString()
+        .padStart(2, "0")} ${period}`;
+    };
+
+    if (period === "PM" && h !== 12) hours += 12;
+    if (period === "AM" && h === 12) hours = 0;
+
+    return hours * 60 + m;
+  };
+
   const calculateSlotEndTime = () => {
     if (!form.slot_start_time || !form.slot_duration || !form.number_of_slots) {
       return "";
@@ -489,6 +559,47 @@ function Modal({
           onChange={(e) => setForm({ ...form, slot_duration: e.target.value })}
         />
 
+        {/* Add Break Time Inputs */}
+        <label className="mt-2 block font-semibold">Break Times</label>
+
+        {breakTimes.map((b, index) => (
+          <div key={index} className="flex gap-2 mb-2">
+            <input
+              type="time"
+              className="input w-full"
+              placeholder="Break Start"
+              value={b.start}
+              onChange={(e) => {
+                const copy = [...breakTimes];
+                copy[index].start = e.target.value;
+                setBreakTimes(copy);
+              }}
+            />
+
+            <input
+              type="time"
+              className="input w-full"
+              placeholder="Break End"
+              value={b.end}
+              onChange={(e) => {
+                const copy = [...breakTimes];
+                copy[index].end = e.target.value;
+                setBreakTimes(copy);
+              }}
+            />
+          </div>
+        ))}
+
+        {/* Add “Add More Break Times” Button */}
+        <button
+          className="btn btn-outline btn-sm w-full mb-3"
+          onClick={() => setBreakTimes([...breakTimes, { start: "", end: "" }])}
+        >
+          + Add More Break Times
+        </button>
+
+
+        {/* Show Calculated Slot End Time */}
         {calculateSlotEndTime() && (
           <p className="text-sm text-gray-600 mb-3">
             Slot End Time:{" "}
