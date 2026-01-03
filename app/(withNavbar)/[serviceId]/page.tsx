@@ -74,6 +74,11 @@ export default function ServiceDetails() {
     price: "",
   });
 
+  /* ================= Break Times ================= */
+  const [breakTimes, setBreakTimes] = useState<
+    { start: string; end: string }[]
+  >([{ start: "", end: "" }]);
+
   /* ================= MORE SERVICES ================= */
   const [moreServices, setMoreServices] = useState<
     { service_name: string; price: string; duration: string }[]
@@ -152,6 +157,7 @@ export default function ServiceDetails() {
       .single();
 
     if (ad) {
+      // save services
       await supabase.from("ad_services").insert(
         moreServices
           .filter((s) => s.service_name)
@@ -160,6 +166,17 @@ export default function ServiceDetails() {
             service_name: s.service_name,
             price: Number(s.price),
             duration: Number(s.duration),
+          }))
+      );
+
+      // ✅ SAVE BREAK TIMES
+      await supabase.from("ad_break_times").insert(
+        breakTimes
+          .filter((b) => b.start && b.end)
+          .map((b) => ({
+            ad_id: ad.id,
+            break_start: b.start,
+            break_end: b.end,
           }))
       );
     }
@@ -202,6 +219,22 @@ export default function ServiceDetails() {
             service_name: s.service_name,
             price: Number(s.price),
             duration: Number(s.duration),
+          }))
+      );
+    }
+
+    if (selectedAd) {
+      // remove old break times
+      await supabase.from("ad_break_times").delete().eq("ad_id", selectedAd.id);
+
+      // insert new break times
+      await supabase.from("ad_break_times").insert(
+        breakTimes
+          .filter((b) => b.start && b.end)
+          .map((b) => ({
+            ad_id: selectedAd.id,
+            break_start: b.start,
+            break_end: b.end,
           }))
       );
     }
@@ -308,6 +341,21 @@ export default function ServiceDetails() {
                         : [{ service_name: "", price: "", duration: "" }]
                     );
 
+                    // LOAD BREAK TIMES
+                    const { data: breaks } = await supabase
+                      .from("ad_break_times")
+                      .select("break_start, break_end")
+                      .eq("ad_id", ad.id);
+
+                    setBreakTimes(
+                      breaks && breaks.length > 0
+                        ? breaks.map((b) => ({
+                            start: b.break_start,
+                            end: b.break_end,
+                          }))
+                        : [{ start: "", end: "" }]
+                    );
+
                     setShowEdit(true);
                   }}
                 >
@@ -336,6 +384,8 @@ export default function ServiceDetails() {
           onSave={showAdd ? handleCreate : handleUpdate}
           moreServices={moreServices}
           setMoreServices={setMoreServices}
+          breakTimes={breakTimes}
+          setBreakTimes={setBreakTimes}
         />
       )}
     </div>
@@ -358,6 +408,11 @@ interface ModalProps {
       { service_name: string; price: string; duration: string }[]
     >
   >;
+
+  breakTimes: { start: string; end: string }[];
+  setBreakTimes: React.Dispatch<
+    React.SetStateAction<{ start: string; end: string }[]>
+  >;
 }
 
 function Modal({
@@ -370,70 +425,17 @@ function Modal({
   onSave,
   moreServices,
   setMoreServices,
+  breakTimes,
+  setBreakTimes,
 }: ModalProps) {
-  const [breakTimes, setBreakTimes] = useState<
-    { start: string; end: string }[]
-  >([{ start: "", end: "" }]);
-
-  //Convert time + AM/PM → minutes
+  // ==============================
+  // 1️⃣ TIME → MINUTES
+  // ==============================
   const timeToMinutes = (time: string, period: string) => {
+    if (!time) return 0;
+
     const [h, m] = time.split(":").map(Number);
     let hours = h;
-
-    // Check if time is within break times
-    const isInBreak = (time: number) => {
-      return breakTimes.some((b) => {
-        if (!b.start || !b.end) return false;
-
-        const start = timeToMinutes(b.start, form.start_period);
-        const end = timeToMinutes(b.end, form.start_period);
-
-        return time >= start && time < end;
-      });
-    };
-
-    //Calculate Slot End Time
-    const calculateSlotEndTime = () => {
-      if (
-        !form.slot_start_time ||
-        !form.slot_duration ||
-        !form.number_of_slots
-      ) {
-        return "";
-      }
-
-      let currentTime = timeToMinutes(form.slot_start_time, form.start_period);
-
-      let createdSlots = 0;
-
-      while (createdSlots < Number(form.number_of_slots)) {
-        if (!isInBreak(currentTime)) {
-          createdSlots++;
-          currentTime += Number(form.slot_duration);
-        } else {
-          // ⏭ Skip break
-          const activeBreak = breakTimes.find((b) => {
-            if (!b.start || !b.end) return false;
-            const start = timeToMinutes(b.start, form.start_period);
-            const end = timeToMinutes(b.end, form.start_period);
-            return currentTime >= start && currentTime < end;
-          });
-
-          if (activeBreak) {
-            currentTime = timeToMinutes(activeBreak.end, form.start_period);
-          }
-        }
-      }
-
-      const hours = Math.floor(currentTime / 60);
-      const minutes = currentTime % 60;
-      const period = hours >= 12 ? "PM" : "AM";
-      const displayHour = hours % 12 || 12;
-
-      return `${displayHour.toString().padStart(2, "0")}:${minutes
-        .toString()
-        .padStart(2, "0")} ${period}`;
-    };
 
     if (period === "PM" && h !== 12) hours += 12;
     if (period === "AM" && h === 12) hours = 0;
@@ -441,36 +443,61 @@ function Modal({
     return hours * 60 + m;
   };
 
+  // ==============================
+  // 2️⃣ CHECK BREAK
+  // ==============================
+  const isInBreak = (time: number) => {
+    return breakTimes.some((b) => {
+      if (!b.start || !b.end) return false;
+
+      const start = timeToMinutes(b.start, form.start_period);
+      const end = timeToMinutes(b.end, form.start_period);
+
+      return time >= start && time < end;
+    });
+  };
+
+  // ==============================
+  // 3️⃣ SLOT END CALCULATION (CORRECT)
+  // ==============================
   const calculateSlotEndTime = () => {
     if (!form.slot_start_time || !form.slot_duration || !form.number_of_slots) {
       return "";
     }
 
-    const [hours, minutes] = form.slot_start_time.split(":").map(Number);
+    let currentTime = timeToMinutes(form.slot_start_time, form.start_period);
 
-    let startHours = hours;
+    let createdSlots = 0;
 
-    // Convert AM/PM to 24-hour format
-    if (form.start_period === "PM" && hours !== 12) startHours += 12;
-    if (form.start_period === "AM" && hours === 12) startHours = 0;
+    while (createdSlots < Number(form.number_of_slots)) {
+      const activeBreak = breakTimes.find((b) => {
+        if (!b.start || !b.end) return false;
 
-    const startDate = new Date();
-    startDate.setHours(startHours, minutes, 0, 0);
+        const start = timeToMinutes(b.start, form.start_period);
+        const end = timeToMinutes(b.end, form.start_period);
 
-    const totalMinutes =
-      Number(form.slot_duration) * Number(form.number_of_slots);
+        return currentTime >= start && currentTime < end;
+      });
 
-    const endDate = new Date(startDate.getTime() + totalMinutes * 60000);
+      // ⏭ Skip break completely
+      if (activeBreak) {
+        currentTime = timeToMinutes(activeBreak.end, form.start_period);
+        continue;
+      }
 
-    let endHours = endDate.getHours();
-    const endMinutes = endDate.getMinutes();
+      // ✅ Create slot
+      currentTime += Number(form.slot_duration);
+      createdSlots++;
+    }
 
-    const endPeriod = endHours >= 12 ? "PM" : "AM";
-    endHours = endHours % 12 || 12;
+    const hours = Math.floor(currentTime / 60);
+    const minutes = currentTime % 60;
+    const period = hours >= 12 ? "PM" : "AM";
+    const displayHour = hours % 12 || 12;
 
-    return `${endHours.toString().padStart(2, "0")}:${endMinutes
+    return `${displayHour.toString().padStart(2, "0")}:${minutes
       .toString()
-      .padStart(2, "0")} ${endPeriod}`;
+      .padStart(2, "0")} ${period}`;
   };
 
   return (
@@ -597,8 +624,7 @@ function Modal({
         >
           + Add More Break Times
         </button>
-
-
+        
         {/* Show Calculated Slot End Time */}
         {calculateSlotEndTime() && (
           <p className="text-sm text-gray-600 mb-3">
