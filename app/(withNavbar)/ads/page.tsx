@@ -45,6 +45,9 @@ export default function AdsPage() {
   const [slots, setSlots] = useState<Slot[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
 
+  const [availableDays, setAvailableDays] = useState<string[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string>("");
+
   // Already booked slots (pending)
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
 
@@ -73,48 +76,73 @@ export default function AdsPage() {
   }, [selectedAd]);
 
   /* ================= FETCH BOOKED SLOTS ================= */
-
   useEffect(() => {
-    if (!selectedAd) return;
+    if (!selectedAd || !selectedDate) return;
 
     supabase
       .from("bookings")
       .select("slot_start")
       .eq("ad_id", selectedAd.id)
+      .eq("slot_date", selectedDate)
       .eq("status", "pending")
       .then(({ data }) => {
         setBookedSlots(data ? data.map((b) => b.slot_start) : []);
       });
-  }, [selectedAd]);
+  }, [selectedAd, selectedDate]);
+
+  // GENERATE SLOTS FOR SELECTED DAY
+
+  useEffect(() => {
+    if (!selectedAd || !selectedDate) return;
+
+    supabase
+      .from("ad_slot_schedules")
+      .select("*")
+      .eq("ad_id", selectedAd.id)
+      .eq("slot_date", selectedDate)
+      .single()
+      .then(({ data }) => {
+        if (!data) return;
+
+        const start = dayjs(
+          `${selectedDate} ${data.slot_start_time} ${data.start_period}`,
+          "YYYY-MM-DD hh:mm A"
+        );
+
+        if (!start.isValid()) return;
+
+        const temp: Slot[] = [];
+        let current = start;
+
+        for (let i = 0; i < data.number_of_slots; i++) {
+          const end = current.add(data.slot_duration, "minute");
+
+          temp.push({
+            start: current.format("hh:mm A"),
+            end: end.format("hh:mm A"),
+          });
+
+          current = end;
+        }
+
+        setSlots(temp);
+      });
+  }, [selectedAd, selectedDate]);
 
   /* ================= GENERATE TIME SLOTS ================= */
 
   useEffect(() => {
     if (!selectedAd) return;
 
-    const today = dayjs().format("YYYY-MM-DD");
-    const start = dayjs(
-      `${today} ${selectedAd.slot_start_time}`,
-      "YYYY-MM-DD hh:mm A"
-    );
-
-    if (!start.isValid()) return;
-
-    const temp: Slot[] = [];
-    let current = start;
-
-    for (let i = 0; i < selectedAd.number_of_slots; i++) {
-      const end = current.add(selectedAd.slot_duration, "minute");
-
-      temp.push({
-        start: current.format("hh:mm A"),
-        end: end.format("hh:mm A"),
+    supabase
+      .from("ad_slot_schedules")
+      .select("slot_date")
+      .eq("ad_id", selectedAd.id)
+      .then(({ data }) => {
+        const days = data?.map((d) => d.slot_date) || [];
+        setAvailableDays(days);
+        setSelectedDate(days[0] || "");
       });
-
-      current = end;
-    }
-
-    setSlots(temp);
   }, [selectedAd]);
 
   /* ================= TOGGLE EXTRA ================= */
@@ -150,6 +178,7 @@ export default function AdsPage() {
     const { error } = await supabase.from("bookings").insert({
       ad_id: selectedAd.id,
       user_id: user.id,
+      slot_date: selectedDate,
       slot_start: selectedSlot.start,
       slot_end: selectedSlot.end,
       total_price: totalPrice,
@@ -177,10 +206,7 @@ export default function AdsPage() {
         {ads.map((ad) => (
           <div key={ad.id} className="card shadow border">
             {ad.banner_url && (
-              <img
-                src={ad.banner_url}
-                className="h-48 w-full object-cover"
-              />
+              <img src={ad.banner_url} className="h-48 w-full object-cover" />
             )}
             <div className="card-body">
               <h2 className="card-title">{ad.title}</h2>
@@ -203,9 +229,7 @@ export default function AdsPage() {
       {selectedAd && (
         <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
           <div className="bg-white p-6 w-[500px] rounded max-h-[90vh] overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4">
-              {selectedAd.title}
-            </h2>
+            <h2 className="text-xl font-bold mb-4">{selectedAd.title}</h2>
 
             {/* Services */}
             <h3 className="font-semibold mb-2">Services</h3>
@@ -230,10 +254,24 @@ export default function AdsPage() {
 
             <p className="font-bold mt-2">Total: Rs {totalPrice}</p>
 
+            {/* DAY SELECTOR */}
+
+            <h3 className="font-semibold mt-4 mb-2">Select Day</h3>
+
+            <select
+              className="select select-bordered w-full mb-4"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+            >
+              {availableDays.map((day) => (
+                <option key={day} value={day}>
+                  {dayjs(day).format("dddd, MMM D")}
+                </option>
+              ))}
+            </select>
+
             {/* Slots */}
-            <h3 className="font-semibold mt-4 mb-2">
-              Select Time Slot
-            </h3>
+            <h3 className="font-semibold mt-4 mb-2">Select Time Slot</h3>
 
             <div className="grid grid-cols-2 gap-2">
               {slots.map((s, i) => {
