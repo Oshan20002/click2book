@@ -638,6 +638,7 @@ function Modal({
             />
 
             {/* Slot Start Time */}
+            <label>Slot Start time</label>
             <div className="flex gap-2 mb-2">
               <input
                 type="time"
@@ -649,22 +650,10 @@ function Modal({
                   setSlotSchedules(copy);
                 }}
               />
-
-              <select
-                className="input w-24"
-                value={slot.start_period}
-                onChange={(e) => {
-                  const copy = [...slotSchedules];
-                  copy[index].start_period = e.target.value as "AM" | "PM";
-                  setSlotSchedules(copy);
-                }}
-              >
-                <option>AM</option>
-                <option>PM</option>
-              </select>
             </div>
 
             {/* Number of Slots */}
+            <label>Number of Slots</label>
             <input
               type="number"
               className="input w-full mb-2"
@@ -678,6 +667,7 @@ function Modal({
             />
 
             {/* Slot Duration */}
+            <label>Slot Duration (minutes)</label>
             <input
               type="number"
               className="input w-full mb-2"
