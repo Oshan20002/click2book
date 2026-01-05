@@ -35,17 +35,32 @@ interface Ad {
   description: string;
   ad_start_time: string;
   ad_end_time: string;
-  slot_start_time: string;
-  slot_duration: number;
-  number_of_slots: number;
   price: number;
   banner_url?: string;
+
+  slot_start_time?: string;
+  slot_duration?: number;
+  number_of_slots?: number;
 }
 
 interface AdService {
   service_name: string;
   price: string;
   duration: string;
+}
+
+interface SlotBreakTime {
+  start: string;
+  end: string;
+}
+
+interface SlotSchedule {
+  date: string;
+  start_time: string;
+  start_period: "AM" | "PM";
+  number_of_slots: number;
+  slot_duration: number;
+  breakTimes: SlotBreakTime[];
 }
 
 /* ================= MAIN COMPONENT ================= */
@@ -62,22 +77,29 @@ export default function ServiceDetails() {
   const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
 
+  const [breakTimes, setBreakTimes] = useState<
+    { start: string; end: string }[]
+  >([{ start: "", end: "" }]);
+
   const [form, setForm] = useState({
     title: "",
     description: "",
     ad_start_time: "",
     ad_end_time: "",
-    slot_start_time: "",
-    start_period: "AM",
-    slot_duration: "",
-    number_of_slots: 1,
     price: "",
   });
 
-  /* ================= Break Times ================= */
-  const [breakTimes, setBreakTimes] = useState<
-    { start: string; end: string }[]
-  >([{ start: "", end: "" }]);
+  /* ================= BREAK TIMES ================= */
+  const [slotSchedules, setSlotSchedules] = useState<SlotSchedule[]>([
+    {
+      date: "",
+      start_time: "",
+      start_period: "AM",
+      number_of_slots: 1,
+      slot_duration: 0,
+      breakTimes: [{ start: "", end: "" }],
+    },
+  ]);
 
   /* ================= MORE SERVICES ================= */
   const [moreServices, setMoreServices] = useState<
@@ -146,9 +168,6 @@ export default function ServiceDetails() {
         category: service?.category,
         ad_start_time: form.ad_start_time,
         ad_end_time: form.ad_end_time,
-        slot_start_time: `${form.slot_start_time} ${form.start_period}`,
-        slot_duration: Number(form.slot_duration) || 0,
-        number_of_slots: Number(form.number_of_slots) || 1,
         price: Number(form.price) || 0,
         banner_url,
         status: "active",
@@ -157,30 +176,33 @@ export default function ServiceDetails() {
       .single();
 
     if (ad) {
-      // save services
-      await supabase.from("ad_services").insert(
-        moreServices
-          .filter((s) => s.service_name)
-          .map((s) => ({
+      for (const slot of slotSchedules) {
+        const { data: slotRow } = await supabase
+          .from("ad_slot_schedules")
+          .insert({
             ad_id: ad.id,
-            service_name: s.service_name,
-            price: Number(s.price),
-            duration: Number(s.duration),
-          }))
-      );
+            slot_date: slot.date,
+            slot_start_time: slot.start_time,
+            start_period: slot.start_period,
+            slot_duration: slot.slot_duration,
+            number_of_slots: slot.number_of_slots,
+          })
+          .select()
+          .single();
 
-      // ✅ SAVE BREAK TIMES
-      await supabase.from("ad_break_times").insert(
-        breakTimes
-          .filter((b) => b.start && b.end)
-          .map((b) => ({
-            ad_id: ad.id,
-            break_start: b.start,
-            break_end: b.end,
-          }))
-      );
+        if (slotRow) {
+          await supabase.from("ad_slot_break_times").insert(
+            slot.breakTimes
+              .filter((b) => b.start && b.end)
+              .map((b) => ({
+                slot_schedule_id: slotRow.id,
+                break_start: b.start,
+                break_end: b.end,
+              }))
+          );
+        }
+      }
     }
-
     reset();
     fetchData();
   };
@@ -198,9 +220,6 @@ export default function ServiceDetails() {
         description: form.description,
         ad_start_time: form.ad_start_time,
         ad_end_time: form.ad_end_time,
-        slot_start_time: `${form.slot_start_time} ${form.start_period}`,
-        slot_duration: Number(form.slot_duration) || 0,
-        number_of_slots: Number(form.number_of_slots) || 1,
         price: Number(form.price) || 0,
         banner_url,
       })
@@ -222,23 +241,6 @@ export default function ServiceDetails() {
           }))
       );
     }
-
-    if (selectedAd) {
-      // remove old break times
-      await supabase.from("ad_break_times").delete().eq("ad_id", selectedAd.id);
-
-      // insert new break times
-      await supabase.from("ad_break_times").insert(
-        breakTimes
-          .filter((b) => b.start && b.end)
-          .map((b) => ({
-            ad_id: selectedAd.id,
-            break_start: b.start,
-            break_end: b.end,
-          }))
-      );
-    }
-
     reset();
     fetchData();
   };
@@ -261,17 +263,25 @@ export default function ServiceDetails() {
     setShowEdit(false);
     setSelectedAd(null);
     setBannerFile(null);
+
     setForm({
       title: "",
       description: "",
       ad_start_time: "",
       ad_end_time: "",
-      slot_start_time: "",
-      start_period: "AM",
-      slot_duration: "",
-      number_of_slots: 1,
       price: "",
     });
+
+    setSlotSchedules([
+      {
+        date: "",
+        start_time: "",
+        start_period: "AM",
+        number_of_slots: 1,
+        slot_duration: 0,
+        breakTimes: [{ start: "", end: "" }],
+      },
+    ]);
 
     setMoreServices([{ service_name: "", price: "", duration: "" }]);
   };
@@ -319,9 +329,10 @@ export default function ServiceDetails() {
                     setSelectedAd(ad);
 
                     setForm({
-                      ...ad,
-                      start_period: ad.slot_start_time.split(" ")[1] || "AM",
-                      slot_duration: ad.slot_duration.toString(),
+                      title: ad.title,
+                      description: ad.description,
+                      ad_start_time: ad.ad_start_time,
+                      ad_end_time: ad.ad_end_time,
                       price: ad.price.toString(),
                     });
 
@@ -384,8 +395,8 @@ export default function ServiceDetails() {
           onSave={showAdd ? handleCreate : handleUpdate}
           moreServices={moreServices}
           setMoreServices={setMoreServices}
-          breakTimes={breakTimes}
-          setBreakTimes={setBreakTimes}
+          slotSchedules={slotSchedules}
+          setSlotSchedules={setSlotSchedules}
         />
       )}
     </div>
@@ -409,10 +420,8 @@ interface ModalProps {
     >
   >;
 
-  breakTimes: { start: string; end: string }[];
-  setBreakTimes: React.Dispatch<
-    React.SetStateAction<{ start: string; end: string }[]>
-  >;
+  slotSchedules: SlotSchedule[];
+  setSlotSchedules: React.Dispatch<React.SetStateAction<SlotSchedule[]>>;
 }
 
 function Modal({
@@ -425,8 +434,8 @@ function Modal({
   onSave,
   moreServices,
   setMoreServices,
-  breakTimes,
-  setBreakTimes,
+  slotSchedules,
+  setSlotSchedules,
 }: ModalProps) {
   // ==============================
   // 1️⃣ TIME → MINUTES
@@ -444,49 +453,34 @@ function Modal({
   };
 
   // ==============================
-  // 2️⃣ CHECK BREAK
-  // ==============================
-  const isInBreak = (time: number) => {
-    return breakTimes.some((b) => {
-      if (!b.start || !b.end) return false;
-
-      const start = timeToMinutes(b.start, form.start_period);
-      const end = timeToMinutes(b.end, form.start_period);
-
-      return time >= start && time < end;
-    });
-  };
-
-  // ==============================
   // 3️⃣ SLOT END CALCULATION (CORRECT)
   // ==============================
-  const calculateSlotEndTime = () => {
-    if (!form.slot_start_time || !form.slot_duration || !form.number_of_slots) {
+  const calculateSlotEndTime = (slot: any) => {
+    if (!slot.start_time || !slot.slot_duration || !slot.number_of_slots) {
       return "";
     }
 
-    let currentTime = timeToMinutes(form.slot_start_time, form.start_period);
-
+    let currentTime = timeToMinutes(slot.start_time, slot.start_period);
     let createdSlots = 0;
 
-    while (createdSlots < Number(form.number_of_slots)) {
-      const activeBreak = breakTimes.find((b) => {
+    while (createdSlots < slot.number_of_slots) {
+      const activeBreak = slot.breakTimes.find((b: any) => {
         if (!b.start || !b.end) return false;
 
-        const start = timeToMinutes(b.start, form.start_period);
-        const end = timeToMinutes(b.end, form.start_period);
+        const start = timeToMinutes(b.start, slot.start_period);
+        const end = timeToMinutes(b.end, slot.start_period);
 
         return currentTime >= start && currentTime < end;
       });
 
-      // ⏭ Skip break completely
+      // ⏭ Skip break
       if (activeBreak) {
-        currentTime = timeToMinutes(activeBreak.end, form.start_period);
+        currentTime = timeToMinutes(activeBreak.end, slot.start_period);
         continue;
       }
 
       // ✅ Create slot
-      currentTime += Number(form.slot_duration);
+      currentTime += slot.slot_duration;
       createdSlots++;
     }
 
@@ -547,91 +541,145 @@ function Modal({
           onChange={(e) => setForm({ ...form, ad_end_time: e.target.value })}
         />
 
-        <label>Slot Start Time</label>
-        <div className="flex gap-2 mb-2">
-          <input
-            type="time"
-            className="input w-32"
-            value={form.slot_start_time}
-            onChange={(e) =>
-              setForm({ ...form, slot_start_time: e.target.value })
-            }
-          />
-          <select
-            className="input w-24"
-            value={form.start_period}
-            onChange={(e) => setForm({ ...form, start_period: e.target.value })}
-          >
-            <option>AM</option>
-            <option>PM</option>
-          </select>
-        </div>
+        <h3 className="font-semibold mt-4 mb-2">Slot Schedules</h3>
 
-        <label>Number of Slots</label>
-        <input
-          type="number"
-          min={1}
-          className="input w-full mb-2"
-          value={form.number_of_slots}
-          onChange={(e) =>
-            setForm({ ...form, number_of_slots: Number(e.target.value) })
-          }
-        />
-
-        <label>Slot Duration (minutes)</label>
-        <input
-          type="number"
-          className="input w-full mb-2"
-          value={form.slot_duration}
-          onChange={(e) => setForm({ ...form, slot_duration: e.target.value })}
-        />
-
-        {/* Add Break Time Inputs */}
-        <label className="mt-2 block font-semibold">Break Times</label>
-
-        {breakTimes.map((b, index) => (
-          <div key={index} className="flex gap-2 mb-2">
+        {slotSchedules.map((slot, index) => (
+          <div key={index} className="border rounded p-3 mb-4">
+            {/* Slot Date */}
+            <label>Slot Date</label>
             <input
-              type="time"
-              className="input w-full"
-              placeholder="Break Start"
-              value={b.start}
+              type="date"
+              className="input w-full mb-2"
+              value={slot.date}
               onChange={(e) => {
-                const copy = [...breakTimes];
-                copy[index].start = e.target.value;
-                setBreakTimes(copy);
+                const copy = [...slotSchedules];
+                copy[index].date = e.target.value;
+                setSlotSchedules(copy);
               }}
             />
 
+            {/* Slot Start Time */}
+            <div className="flex gap-2 mb-2">
+              <input
+                type="time"
+                className="input w-full"
+                value={slot.start_time}
+                onChange={(e) => {
+                  const copy = [...slotSchedules];
+                  copy[index].start_time = e.target.value;
+                  setSlotSchedules(copy);
+                }}
+              />
+
+              <select
+                className="input w-24"
+                value={slot.start_period}
+                onChange={(e) => {
+                  const copy = [...slotSchedules];
+                  copy[index].start_period = e.target.value as "AM" | "PM";
+                  setSlotSchedules(copy);
+                }}
+              >
+                <option>AM</option>
+                <option>PM</option>
+              </select>
+            </div>
+
+            {/* Number of Slots */}
             <input
-              type="time"
-              className="input w-full"
-              placeholder="Break End"
-              value={b.end}
+              type="number"
+              className="input w-full mb-2"
+              placeholder="Number of Slots"
+              value={slot.number_of_slots}
               onChange={(e) => {
-                const copy = [...breakTimes];
-                copy[index].end = e.target.value;
-                setBreakTimes(copy);
+                const copy = [...slotSchedules];
+                copy[index].number_of_slots = Number(e.target.value);
+                setSlotSchedules(copy);
               }}
             />
+
+            {/* Slot Duration */}
+            <input
+              type="number"
+              className="input w-full mb-2"
+              placeholder="Slot Duration (minutes)"
+              value={slot.slot_duration}
+              onChange={(e) => {
+                const copy = [...slotSchedules];
+                copy[index].slot_duration = Number(e.target.value);
+                setSlotSchedules(copy);
+              }}
+            />
+
+            {/* Break Times */}
+            <label className="font-semibold">Break Times</label>
+
+            {slot.breakTimes.map((b, bIndex) => (
+              <div key={bIndex} className="flex gap-2 mb-2">
+                <input
+                  type="time"
+                  className="input w-full"
+                  value={b.start}
+                  onChange={(e) => {
+                    const copy = [...slotSchedules];
+                    copy[index].breakTimes[bIndex].start = e.target.value;
+                    setSlotSchedules(copy);
+                  }}
+                />
+                <input
+                  type="time"
+                  className="input w-full"
+                  value={b.end}
+                  onChange={(e) => {
+                    const copy = [...slotSchedules];
+                    copy[index].breakTimes[bIndex].end = e.target.value;
+                    setSlotSchedules(copy);
+                  }}
+                />
+              </div>
+            ))}
+
+            <button
+              className="btn btn-outline btn-sm w-full"
+              onClick={() => {
+                const copy = [...slotSchedules];
+                copy[index].breakTimes.push({ start: "", end: "" });
+                setSlotSchedules(copy);
+              }}
+            >
+              + Add Break Time
+            </button>
+
+            {calculateSlotEndTime(slot) && (
+              <p className="text-sm text-gray-600 mt-2">
+                Slot End Time:
+                <span className="font-semibold ml-1">
+                  {calculateSlotEndTime(slot)}
+                </span>
+              </p>
+            )}
           </div>
         ))}
 
-        {/* Add “Add More Break Times” Button */}
+        {/* ➕ ADD ANOTHER DAY */}
         <button
-          className="btn btn-outline btn-sm w-full mb-3"
-          onClick={() => setBreakTimes([...breakTimes, { start: "", end: "" }])}
+          className="btn btn-primary w-full"
+          onClick={() =>
+            setSlotSchedules([
+              ...slotSchedules,
+              {
+                date: "",
+                start_time: "",
+                start_period: "AM",
+                number_of_slots: 1,
+                slot_duration: 0,
+                breakTimes: [{ start: "", end: "" }],
+              },
+            ])
+          }
         >
-          + Add More Break Times
+          + Add Slot for Another Day
         </button>
-        
-        {/* Show Calculated Slot End Time */}
-        {calculateSlotEndTime() && (
-          <p className="text-sm text-gray-600 mb-3">
-            Slot End Time:{" "}
-            <span className="font-semibold">{calculateSlotEndTime()}</span>
-          </p>
-        )}
 
         <label>Price (Rs)</label>
         <input
