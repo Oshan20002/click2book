@@ -56,11 +56,23 @@ export default function AdsPage() {
   useEffect(() => {
     if (!category) return;
 
+    const now = dayjs().toISOString();
+
     supabase
       .from("ads")
       .select("*")
       .eq("category", category)
-      .then(({ data }) => setAds(data || []));
+      .lte("ad_start_time", now) // ad already started
+      .gte("ad_end_time", now) // ad not expired
+      .then(({ data, error }) => {
+        if (error) {
+          console.error(error);
+          setAds([]);
+          return;
+        }
+
+        setAds(data || []);
+      });
   }, [category]);
 
   /* ================= FETCH EXTRA SERVICES ================= */
