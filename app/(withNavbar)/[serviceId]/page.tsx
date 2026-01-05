@@ -3,6 +3,12 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 /* ================= CATEGORY IMAGES ================= */
 /* Category → Image Mapping */
@@ -118,10 +124,14 @@ export default function ServiceDetails() {
       .eq("id", serviceId)
       .single();
 
+    const nowUTC = dayjs().utc().toISOString();
+
     const { data: adsData } = await supabase
       .from("ads")
       .select("*")
       .eq("service_id", serviceId)
+      .lte("ad_start_time", nowUTC)
+      .gte("ad_end_time", nowUTC)
       .order("created_at", { ascending: false });
 
     setService(serviceData);
@@ -166,8 +176,16 @@ export default function ServiceDetails() {
         title: form.title,
         description: form.description,
         category: service?.category,
-        ad_start_time: form.ad_start_time,
-        ad_end_time: form.ad_end_time,
+        ad_start_time: dayjs
+          .tz(form.ad_start_time, "Asia/Colombo")
+          .utc()
+          .toISOString(),
+
+        ad_end_time: dayjs
+          .tz(form.ad_end_time, "Asia/Colombo")
+          .utc()
+          .toISOString(),
+
         price: Number(form.price) || 0,
         banner_url,
         status: "active",
@@ -209,27 +227,39 @@ export default function ServiceDetails() {
 
   /* ================= UPDATE ================= */
   const handleUpdate = async () => {
+    if (!selectedAd) return;
+
     const banner_url = bannerFile
       ? await uploadBanner()
-      : selectedAd?.banner_url;
+      : selectedAd.banner_url;
 
-    await supabase
+    const { error } = await supabase
       .from("ads")
       .update({
         title: form.title,
         description: form.description,
-        ad_start_time: form.ad_start_time,
-        ad_end_time: form.ad_end_time,
+        ad_start_time: dayjs
+          .tz(form.ad_start_time, "Asia/Colombo")
+          .utc()
+          .toISOString(),
+        ad_end_time: dayjs
+          .tz(form.ad_end_time, "Asia/Colombo")
+          .utc()
+          .toISOString(),
         price: Number(form.price) || 0,
         banner_url,
       })
-      .eq("id", selectedAd?.id);
+      .eq("id", selectedAd.id);
 
-    if (selectedAd) {
-      // remove old services
-      await supabase.from("ad_services").delete().eq("ad_id", selectedAd.id);
+    if (error) {
+      alert(error.message);
+      return;
+    }
 
-      // insert updated services
+    // Update extra services
+    await supabase.from("ad_services").delete().eq("ad_id", selectedAd.id);
+
+    if (moreServices.length > 0) {
       await supabase.from("ad_services").insert(
         moreServices
           .filter((s) => s.service_name)
@@ -241,6 +271,41 @@ export default function ServiceDetails() {
           }))
       );
     }
+
+    // Remove old schedules
+    await supabase
+      .from("ad_slot_schedules")
+      .delete()
+      .eq("ad_id", selectedAd.id);
+
+    // Re-insert updated schedules
+    for (const slot of slotSchedules) {
+      const { data: slotRow } = await supabase
+        .from("ad_slot_schedules")
+        .insert({
+          ad_id: selectedAd.id,
+          slot_date: slot.date,
+          slot_start_time: slot.start_time,
+          start_period: slot.start_period,
+          slot_duration: slot.slot_duration,
+          number_of_slots: slot.number_of_slots,
+        })
+        .select()
+        .single();
+
+      if (slotRow) {
+        await supabase.from("ad_slot_break_times").insert(
+          slot.breakTimes
+            .filter((b) => b.start && b.end)
+            .map((b) => ({
+              slot_schedule_id: slotRow.id,
+              break_start: b.start,
+              break_end: b.end,
+            }))
+        );
+      }
+    }
+
     reset();
     fetchData();
   };
@@ -317,8 +382,16 @@ export default function ServiceDetails() {
                 Slot Duration: {ad.slot_duration} minutes
               </p>
               <p className="text-sm">
-                Ad Time: {ad.ad_start_time} → {ad.ad_end_time}
+                Ad Time:{" "}
+                {dayjs(ad.ad_start_time)
+                  .tz("Asia/Colombo")
+                  .format("YYYY-MM-DD hh:mm A")}
+                {" → "}
+                {dayjs(ad.ad_end_time)
+                  .tz("Asia/Colombo")
+                  .format("YYYY-MM-DD hh:mm A")}
               </p>
+
               <p className="text-sm">Slot Start: {ad.slot_start_time}</p>
               <p className="text-sm">Number of Slots: {ad.number_of_slots}</p>
 
@@ -331,8 +404,14 @@ export default function ServiceDetails() {
                     setForm({
                       title: ad.title,
                       description: ad.description,
-                      ad_start_time: ad.ad_start_time,
-                      ad_end_time: ad.ad_end_time,
+                      ad_start_time: dayjs(ad.ad_start_time)
+                        .tz("Asia/Colombo")
+                        .format("YYYY-MM-DDTHH:mm"),
+
+                      ad_end_time: dayjs(ad.ad_end_time)
+                        .tz("Asia/Colombo")
+                        .format("YYYY-MM-DDTHH:mm"),
+
                       price: ad.price.toString(),
                     });
 

@@ -4,6 +4,11 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 /* ================= TYPES ================= */
 
@@ -56,7 +61,7 @@ export default function AdsPage() {
   useEffect(() => {
     if (!category) return;
 
-    const now = dayjs().toISOString();
+    const now = dayjs().tz("Asia/Colombo").toISOString();
 
     supabase
       .from("ads")
@@ -105,41 +110,98 @@ export default function AdsPage() {
   // GENERATE SLOTS FOR SELECTED DAY
 
   useEffect(() => {
-    if (!selectedAd || !selectedDate) return;
+  if (!selectedAd || !selectedDate) return;
 
-    supabase
-      .from("ad_slot_schedules")
-      .select("*")
-      .eq("ad_id", selectedAd.id)
-      .eq("slot_date", selectedDate)
-      .single()
-      .then(({ data }) => {
-        if (!data) return;
+  supabase
+    .from("ad_slot_schedules")
+    .select(`
+      id,
+      slot_start_time,
+      start_period,
+      slot_duration,
+      number_of_slots,
+      ad_slot_break_times (
+        break_start,
+        break_end
+      )
+    `)
+    .eq("ad_id", selectedAd.id)
+    .eq("slot_date", selectedDate)
+    .limit(1)
+    .maybeSingle()
+    .then(({ data, error }) => {
+      if (error || !data) {
+        setSlots([]);
+        return;
+      }
 
-        const start = dayjs(
-          `${selectedDate} ${data.slot_start_time} ${data.start_period}`,
-          "YYYY-MM-DD hh:mm A"
-        );
+      const breaks = data.ad_slot_break_times || [];
+      const temp: Slot[] = [];
 
-        if (!start.isValid()) return;
+      // 🔁 helper: time → minutes
+      const timeToMinutes = (time: string, period: string) => {
+        const [h, m] = time.split(":").map(Number);
+        let hours = h;
 
-        const temp: Slot[] = [];
-        let current = start;
+        if (period === "PM" && h !== 12) hours += 12;
+        if (period === "AM" && h === 12) hours = 0;
 
-        for (let i = 0; i < data.number_of_slots; i++) {
-          const end = current.add(data.slot_duration, "minute");
+        return hours * 60 + m;
+      };
 
-          temp.push({
-            start: current.format("hh:mm A"),
-            end: end.format("hh:mm A"),
+      // 🔁 helper: check break
+      const isInBreak = (time: number) => {
+        return breaks.some((b) => {
+          const start = timeToMinutes(b.break_start, data.start_period);
+          const end = timeToMinutes(b.break_end, data.start_period);
+          return time >= start && time < end;
+        });
+      };
+
+      let currentMinutes = timeToMinutes(
+        data.slot_start_time,
+        data.start_period
+      );
+
+      let createdSlots = 0;
+
+      while (createdSlots < data.number_of_slots) {
+        // ⛔ skip break time
+        if (isInBreak(currentMinutes)) {
+          const activeBreak = breaks.find((b) => {
+            const start = timeToMinutes(b.break_start, data.start_period);
+            const end = timeToMinutes(b.break_end, data.start_period);
+            return currentMinutes >= start && currentMinutes < end;
           });
 
-          current = end;
+          if (activeBreak) {
+            currentMinutes = timeToMinutes(
+              activeBreak.break_end,
+              data.start_period
+            );
+          }
+          continue;
         }
 
-        setSlots(temp);
-      });
-  }, [selectedAd, selectedDate]);
+        const startTime = dayjs(selectedDate)
+          .hour(Math.floor(currentMinutes / 60))
+          .minute(currentMinutes % 60);
+
+        const endTime = startTime.add(data.slot_duration, "minute");
+
+        temp.push({
+          start: startTime.format("hh:mm A"),
+          end: endTime.format("hh:mm A"),
+        });
+
+        currentMinutes += data.slot_duration;
+        createdSlots++;
+      }
+
+      setSlots(temp);
+    });
+}, [selectedAd, selectedDate]);
+
 
   /* ================= GENERATE TIME SLOTS ================= */
 
