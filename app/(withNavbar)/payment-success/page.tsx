@@ -1,12 +1,19 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+type Props = {
+  searchParams: {
+    booking_id?: string;
+  };
+};
+
+
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
-export default function PaymentSuccess() {
-  const searchParams = useSearchParams();
-  const bookingId = searchParams.get("booking_id");
+export default function PaymentSuccess({ searchParams }: Props) {
+  const bookingId = searchParams.booking_id;
+
+
 
   const [status, setStatus] = useState<
     "loading" | "success" | "error"
