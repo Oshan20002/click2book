@@ -1,11 +1,15 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
+
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
