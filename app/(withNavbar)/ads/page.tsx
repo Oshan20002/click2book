@@ -281,7 +281,7 @@ export default function AdsPage({ searchParams }: Props) {
     // 2️⃣ Redirect to PayHere sandbox payment link
     // Rs 1000 payment
     window.location.href =
-      "https://sandbox.payhere.lk/pay/o83c56818?order_id=" + bookingId;
+      "https://sandbox.payhere.lk/pay/o6aa6cd2d?order_id=" + bookingId;
   };
 
   /* ================= UI ================= */
