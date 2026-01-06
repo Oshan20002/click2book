@@ -1,9 +1,13 @@
 "use client";
 
+type Props = {
+  searchParams: {
+    category?: string;
+  };
+};
+
 export const dynamic = "force-dynamic";
 
-
-import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import dayjs from "dayjs";
@@ -41,9 +45,9 @@ type Slot = {
 
 /* ================= COMPONENT ================= */
 
-export default function AdsPage() {
-  const searchParams = useSearchParams();
-  const category = searchParams.get("category");
+export default function AdsPage({ searchParams }: Props) {
+  const category = searchParams.category ?? "";
+
 
   const [ads, setAds] = useState<Ad[]>([]);
   const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
