@@ -1,49 +1,18 @@
 "use client";
 
-type Props = {
-  searchParams: {
-    order_id?: string;
-  };
-};
-
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
 
-export default function PaymentSuccess({ searchParams }: Props) {
-  const bookingId = searchParams.order_id;
-
-  const [status, setStatus] = useState<"loading" | "success" | "error">(
-    "loading"
-  );
+export default function PaymentSuccess() {
+  const [status, setStatus] = useState<"loading" | "success">("loading");
 
   useEffect(() => {
-    if (!bookingId) {
-      setStatus("error");
-      return;
-    }
+    // Give Edge Function time to update DB
+    const timer = setTimeout(() => {
+      setStatus("success");
+    }, 3000);
 
-    const checkBookingStatus = async () => {
-      const { data, error } = await supabase
-        .from("bookings")
-        .select("status")
-        .eq("id", bookingId)
-        .single();
-
-      if (error || !data) {
-        setStatus("error");
-        return;
-      }
-
-      if (data.status === "completed") {
-        setStatus("success");
-      } else {
-        // still waiting for PayHere notify
-        setTimeout(checkBookingStatus, 2000);
-      }
-    };
-
-    checkBookingStatus();
-  }, [bookingId]);
+    return () => clearTimeout(timer);
+  }, []);
 
   if (status === "loading") {
     return (
@@ -55,22 +24,14 @@ export default function PaymentSuccess({ searchParams }: Props) {
     );
   }
 
-  if (status === "error") {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-lg font-semibold text-red-600">
-          Payment failed or booking not found
-        </p>
-      </div>
-    );
-  }
-
   return (
     <div className="flex flex-col items-center justify-center h-screen">
       <h1 className="text-3xl font-bold text-green-600">
         ✅ Booking Successful!
       </h1>
-      <p className="mt-2">Your payment was completed successfully.</p>
+      <p className="mt-2">
+        Your payment was completed successfully.
+      </p>
     </div>
   );
 }
