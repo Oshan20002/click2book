@@ -250,8 +250,9 @@ export default function AdsPage({ searchParams }: Props) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
+
     if (!user) {
-      alert("Please login");
+      alert("Please login to book");
       return;
     }
 
@@ -276,65 +277,16 @@ export default function AdsPage({ searchParams }: Props) {
     }
 
     const bookingId = data.id;
-    const orderId = `BOOKING_${bookingId}`;
+    const payhereOrderId = `BOOKING_${bookingId}`;
 
-    // save order id
+    // 2️⃣ Save PayHere order id
     await supabase
       .from("bookings")
-      .update({ payhere_order_id: orderId })
+      .update({ payhere_order_id: payhereOrderId })
       .eq("id", bookingId);
 
-    // 2️⃣ GET HASH (THIS IS THE PART YOU ASKED ABOUT)
-    const res = await fetch(
-      "https://krxkuasaiqaulxfbqnad.functions.supabase.co/payhere-hash",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          merchant_id: "1233476",
-          order_id: orderId,
-          amount: totalPrice,
-          currency: "LKR",
-        }),
-      }
-    );
-
-    const { hash } = await res.json();
-
-    // 3️⃣ Redirect to PayHere (PAYMENT PAGE)
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = "https://sandbox.payhere.lk/pay/checkout";
-
-    const fields = {
-      merchant_id: "1233476",
-      order_id: orderId,
-      items: "Ad Booking",
-      amount: totalPrice.toFixed(2),
-      currency: "LKR",
-      hash,
-
-      first_name: "Test",
-      last_name: "User",
-      email: user.email ?? "test@test.com",
-      phone: "0770000000",
-
-      notify_url:
-        "https://krxkuasaiqaulxfbqnad.functions.supabase.co/payhere-notify",
-      return_url: window.location.origin + "/payment-success",
-      cancel_url: window.location.origin + "/payment-cancel",
-    };
-
-    Object.entries(fields).forEach(([k, v]) => {
-      const i = document.createElement("input");
-      i.type = "hidden";
-      i.name = k;
-      i.value = v;
-      form.appendChild(i);
-    });
-
-    document.body.appendChild(form);
-    form.submit();
+    // 3️⃣ REDIRECT TO PAYHERE PAYMENT LINK (🔥 THIS IS THE KEY 🔥)
+    window.location.href = "https://sandbox.payhere.lk/pay/o6aa6cd2d";
   };
 
   /* ================= UI ================= */
