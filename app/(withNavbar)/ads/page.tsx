@@ -250,9 +250,12 @@ export default function AdsPage({ searchParams }: Props) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    if (!user) return alert("Login required");
+    if (!user) {
+      alert("Please login");
+      return;
+    }
 
-    // 1. create booking
+    // 1️⃣ Create booking
     const { data, error } = await supabase
       .from("bookings")
       .insert({
@@ -267,17 +270,21 @@ export default function AdsPage({ searchParams }: Props) {
       .select("id")
       .single();
 
-    if (error || !data) return alert("Booking failed");
+    if (error || !data) {
+      alert("Booking failed");
+      return;
+    }
 
     const bookingId = data.id;
     const orderId = `BOOKING_${bookingId}`;
 
+    // save order id
     await supabase
       .from("bookings")
       .update({ payhere_order_id: orderId })
       .eq("id", bookingId);
 
-    // 2. get hash
+    // 2️⃣ GET HASH (THIS IS THE PART YOU ASKED ABOUT)
     const res = await fetch(
       "https://krxkuasaiqaulxfbqnad.functions.supabase.co/payhere-hash",
       {
@@ -294,7 +301,7 @@ export default function AdsPage({ searchParams }: Props) {
 
     const { hash } = await res.json();
 
-    // 3. redirect to PayHere
+    // 3️⃣ Redirect to PayHere (PAYMENT PAGE)
     const form = document.createElement("form");
     form.method = "POST";
     form.action = "https://sandbox.payhere.lk/pay/checkout";
@@ -311,9 +318,6 @@ export default function AdsPage({ searchParams }: Props) {
       last_name: "User",
       email: user.email ?? "test@test.com",
       phone: "0770000000",
-      address: "Colombo",
-      city: "Colombo",
-      country: "Sri Lanka",
 
       notify_url:
         "https://krxkuasaiqaulxfbqnad.functions.supabase.co/payhere-notify",
