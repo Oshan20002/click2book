@@ -110,11 +110,12 @@ export default function AdsPage() {
   // GENERATE SLOTS FOR SELECTED DAY
 
   useEffect(() => {
-  if (!selectedAd || !selectedDate) return;
+    if (!selectedAd || !selectedDate) return;
 
-  supabase
-    .from("ad_slot_schedules")
-    .select(`
+    supabase
+      .from("ad_slot_schedules")
+      .select(
+        `
       id,
       slot_start_time,
       start_period,
@@ -124,84 +125,84 @@ export default function AdsPage() {
         break_start,
         break_end
       )
-    `)
-    .eq("ad_id", selectedAd.id)
-    .eq("slot_date", selectedDate)
-    .limit(1)
-    .maybeSingle()
-    .then(({ data, error }) => {
-      if (error || !data) {
-        setSlots([]);
-        return;
-      }
-
-      const breaks = data.ad_slot_break_times || [];
-      const temp: Slot[] = [];
-
-      // 🔁 helper: time → minutes
-      const timeToMinutes = (time: string, period: string) => {
-        const [h, m] = time.split(":").map(Number);
-        let hours = h;
-
-        if (period === "PM" && h !== 12) hours += 12;
-        if (period === "AM" && h === 12) hours = 0;
-
-        return hours * 60 + m;
-      };
-
-      // 🔁 helper: check break
-      const isInBreak = (time: number) => {
-        return breaks.some((b) => {
-          const start = timeToMinutes(b.break_start, data.start_period);
-          const end = timeToMinutes(b.break_end, data.start_period);
-          return time >= start && time < end;
-        });
-      };
-
-      let currentMinutes = timeToMinutes(
-        data.slot_start_time,
-        data.start_period
-      );
-
-      let createdSlots = 0;
-
-      while (createdSlots < data.number_of_slots) {
-        // ⛔ skip break time
-        if (isInBreak(currentMinutes)) {
-          const activeBreak = breaks.find((b) => {
-            const start = timeToMinutes(b.break_start, data.start_period);
-            const end = timeToMinutes(b.break_end, data.start_period);
-            return currentMinutes >= start && currentMinutes < end;
-          });
-
-          if (activeBreak) {
-            currentMinutes = timeToMinutes(
-              activeBreak.break_end,
-              data.start_period
-            );
-          }
-          continue;
+    `
+      )
+      .eq("ad_id", selectedAd.id)
+      .eq("slot_date", selectedDate)
+      .limit(1)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (error || !data) {
+          setSlots([]);
+          return;
         }
 
-        const startTime = dayjs(selectedDate)
-          .hour(Math.floor(currentMinutes / 60))
-          .minute(currentMinutes % 60);
+        const breaks = data.ad_slot_break_times || [];
+        const temp: Slot[] = [];
 
-        const endTime = startTime.add(data.slot_duration, "minute");
+        // 🔁 helper: time → minutes
+        const timeToMinutes = (time: string, period: string) => {
+          const [h, m] = time.split(":").map(Number);
+          let hours = h;
 
-        temp.push({
-          start: startTime.format("hh:mm A"),
-          end: endTime.format("hh:mm A"),
-        });
+          if (period === "PM" && h !== 12) hours += 12;
+          if (period === "AM" && h === 12) hours = 0;
 
-        currentMinutes += data.slot_duration;
-        createdSlots++;
-      }
+          return hours * 60 + m;
+        };
 
-      setSlots(temp);
-    });
-}, [selectedAd, selectedDate]);
+        // 🔁 helper: check break
+        const isInBreak = (time: number) => {
+          return breaks.some((b) => {
+            const start = timeToMinutes(b.break_start, data.start_period);
+            const end = timeToMinutes(b.break_end, data.start_period);
+            return time >= start && time < end;
+          });
+        };
 
+        let currentMinutes = timeToMinutes(
+          data.slot_start_time,
+          data.start_period
+        );
+
+        let createdSlots = 0;
+
+        while (createdSlots < data.number_of_slots) {
+          // ⛔ skip break time
+          if (isInBreak(currentMinutes)) {
+            const activeBreak = breaks.find((b) => {
+              const start = timeToMinutes(b.break_start, data.start_period);
+              const end = timeToMinutes(b.break_end, data.start_period);
+              return currentMinutes >= start && currentMinutes < end;
+            });
+
+            if (activeBreak) {
+              currentMinutes = timeToMinutes(
+                activeBreak.break_end,
+                data.start_period
+              );
+            }
+            continue;
+          }
+
+          const startTime = dayjs(selectedDate)
+            .hour(Math.floor(currentMinutes / 60))
+            .minute(currentMinutes % 60);
+
+          const endTime = startTime.add(data.slot_duration, "minute");
+
+          temp.push({
+            start: startTime.format("hh:mm A"),
+            end: endTime.format("hh:mm A"),
+          });
+
+          currentMinutes += data.slot_duration;
+          createdSlots++;
+        }
+
+        setSlots(temp);
+      });
+  }, [selectedAd, selectedDate]);
 
   /* ================= GENERATE TIME SLOTS ================= */
 
@@ -249,25 +250,49 @@ export default function AdsPage() {
       return;
     }
 
-    const { error } = await supabase.from("bookings").insert({
-      ad_id: selectedAd.id,
-      user_id: user.id,
-      slot_date: selectedDate,
-      slot_start: selectedSlot.start,
-      slot_end: selectedSlot.end,
-      total_price: totalPrice,
-      status: "pending",
-    });
+    const { data, error } = await supabase
+      .from("bookings")
+      .insert({
+        ad_id: selectedAd.id,
+        user_id: user.id,
+        slot_date: selectedDate,
+        slot_start: selectedSlot.start,
+        slot_end: selectedSlot.end,
+        total_price: totalPrice,
+        status: "pending",
+      })
+      .select("id")
+      .single();
 
-    if (error) {
-      alert(error.message);
+    if (error || !data) {
+      alert("Booking failed");
       return;
     }
 
-    alert("Booking successful!");
-    setSelectedAd(null);
-    setSelectedExtras([]);
-    setSelectedSlot(null);
+    const bookingId = data.id;
+
+    const res = await fetch("/api/payhere-pay", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bookingId }),
+    });
+
+    const payhere = await res.json();
+
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "https://sandbox.payhere.lk/pay/checkout";
+
+    Object.entries(payhere).forEach(([key, value]) => {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = key;
+      input.value = value as string;
+      form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
   };
 
   /* ================= UI ================= */
