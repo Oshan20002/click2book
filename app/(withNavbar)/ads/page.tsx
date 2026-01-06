@@ -14,7 +14,6 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 
-
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -47,7 +46,6 @@ type Slot = {
 
 export default function AdsPage({ searchParams }: Props) {
   const category = searchParams.category ?? "";
-
 
   const [ads, setAds] = useState<Ad[]>([]);
   const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
@@ -258,6 +256,7 @@ export default function AdsPage({ searchParams }: Props) {
       return;
     }
 
+    // 1️⃣ Create booking as PENDING
     const { data, error } = await supabase
       .from("bookings")
       .insert({
@@ -279,28 +278,10 @@ export default function AdsPage({ searchParams }: Props) {
 
     const bookingId = data.id;
 
-    const res = await fetch("/api/payhere-pay", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ bookingId }),
-    });
-
-    const payhere = await res.json();
-
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = "https://sandbox.payhere.lk/pay/checkout";
-
-    Object.entries(payhere).forEach(([key, value]) => {
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = key;
-      input.value = value as string;
-      form.appendChild(input);
-    });
-
-    document.body.appendChild(form);
-    form.submit();
+    // 2️⃣ Redirect to PayHere sandbox payment link
+    // Rs 1000 payment
+    window.location.href =
+      "https://sandbox.payhere.lk/pay/o83c56818?booking_id=" + bookingId;
   };
 
   /* ================= UI ================= */
