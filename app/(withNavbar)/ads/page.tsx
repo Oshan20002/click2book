@@ -250,13 +250,9 @@ export default function AdsPage({ searchParams }: Props) {
     const {
       data: { user },
     } = await supabase.auth.getUser();
+    if (!user) return alert("Login required");
 
-    if (!user) {
-      alert("Please login to book");
-      return;
-    }
-
-    // 1️⃣ Create booking as PENDING
+    // 1. create booking
     const { data, error } = await supabase
       .from("bookings")
       .insert({
@@ -271,41 +267,53 @@ export default function AdsPage({ searchParams }: Props) {
       .select("id")
       .single();
 
-    if (error || !data) {
-      alert("Booking failed");
-      return;
-    }
+    if (error || !data) return alert("Booking failed");
 
-    // ✅ GUARANTEE booking id
-    if (!data.id) {
-      throw new Error("Booking ID not returned");
-    }
+    const bookingId = data.id;
+    const orderId = `BOOKING_${bookingId}`;
 
-    const bookingId: number = data.id;
-    const payhereOrderId: string = `BOOKING_${bookingId}`;
-
-    // 2️⃣ Save PayHere order id
     await supabase
       .from("bookings")
-      .update({ payhere_order_id: payhereOrderId })
+      .update({ payhere_order_id: orderId })
       .eq("id", bookingId);
 
-    // 3️⃣ Redirect to PayHere checkout (POST)
+    // 2. get hash
+    const res = await fetch(
+      "https://krxkuasaiqaulxfbqnad.functions.supabase.co/payhere-hash",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          merchant_id: "1233476",
+          order_id: orderId,
+          amount: totalPrice,
+          currency: "LKR",
+        }),
+      }
+    );
+
+    const { hash } = await res.json();
+
+    // 3. redirect to PayHere
     const form = document.createElement("form");
     form.method = "POST";
     form.action = "https://sandbox.payhere.lk/pay/checkout";
 
-    const fields: Record<string, string> = {
+    const fields = {
       merchant_id: "1233476",
-      order_id: payhereOrderId,
+      order_id: orderId,
       items: "Ad Booking",
       amount: totalPrice.toFixed(2),
       currency: "LKR",
+      hash,
 
-      first_name: user.email ?? "User",
-      last_name: "Booking",
+      first_name: "Test",
+      last_name: "User",
       email: user.email ?? "test@test.com",
       phone: "0770000000",
+      address: "Colombo",
+      city: "Colombo",
+      country: "Sri Lanka",
 
       notify_url:
         "https://krxkuasaiqaulxfbqnad.functions.supabase.co/payhere-notify",
@@ -313,12 +321,12 @@ export default function AdsPage({ searchParams }: Props) {
       cancel_url: window.location.origin + "/payment-cancel",
     };
 
-    Object.entries(fields).forEach(([key, value]) => {
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = key;
-      input.value = value;
-      form.appendChild(input);
+    Object.entries(fields).forEach(([k, v]) => {
+      const i = document.createElement("input");
+      i.type = "hidden";
+      i.name = k;
+      i.value = v;
+      form.appendChild(i);
     });
 
     document.body.appendChild(form);
