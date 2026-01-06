@@ -1,37 +1,53 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function PaymentSuccess() {
-  const [status, setStatus] = useState<"loading" | "success">("loading");
+  const [status, setStatus] = useState<
+    "loading" | "success" | "failed"
+  >("loading");
 
   useEffect(() => {
-    // Give Edge Function time to update DB
-    const timer = setTimeout(() => {
-      setStatus("success");
-    }, 3000);
+    const checkStatus = async () => {
+      const { data } = await supabase
+        .from("bookings")
+        .select("status")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
 
-    return () => clearTimeout(timer);
+      if (!data) return;
+
+      if (data.status === "completed") {
+        setStatus("success");
+      } else if (data.status === "failed") {
+        setStatus("failed");
+      } else {
+        setTimeout(checkStatus, 2000);
+      }
+    };
+
+    checkStatus();
   }, []);
 
   if (status === "loading") {
+    return <p className="text-center mt-20">Processing payment…</p>;
+  }
+
+  if (status === "failed") {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <p className="text-lg font-semibold">
-          Processing payment, please wait...
-        </p>
+      <div className="text-center mt-20">
+        <h1 className="text-2xl text-red-600">❌ Payment Failed</h1>
+        <p>Please try again.</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <h1 className="text-3xl font-bold text-green-600">
-        ✅ Booking Successful!
-      </h1>
-      <p className="mt-2">
-        Your payment was completed successfully.
-      </p>
+    <div className="text-center mt-20">
+      <h1 className="text-2xl text-green-600">✅ Payment Successful</h1>
+      <p>Your booking is confirmed.</p>
     </div>
   );
 }
