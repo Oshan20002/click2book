@@ -2,22 +2,19 @@
 
 type Props = {
   searchParams: {
-    booking_id?: string;
+    order_id?: string;
   };
 };
-
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function PaymentSuccess({ searchParams }: Props) {
-  const bookingId = searchParams.booking_id;
+  const bookingId = searchParams.order_id;
 
-
-
-  const [status, setStatus] = useState<
-    "loading" | "success" | "error"
-  >("loading");
+  const [status, setStatus] = useState<"loading" | "success" | "error">(
+    "loading"
+  );
 
   useEffect(() => {
     if (!bookingId) {
@@ -73,9 +70,7 @@ export default function PaymentSuccess({ searchParams }: Props) {
       <h1 className="text-3xl font-bold text-green-600">
         ✅ Booking Successful!
       </h1>
-      <p className="mt-2">
-        Your payment was completed successfully.
-      </p>
+      <p className="mt-2">Your payment was completed successfully.</p>
     </div>
   );
 }
