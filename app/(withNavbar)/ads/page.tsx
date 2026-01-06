@@ -277,6 +277,16 @@ export default function AdsPage({ searchParams }: Props) {
     }
 
     const bookingId = data.id;
+
+    // TEMPORARY: manually map payment link → booking
+    await supabase
+      .from("bookings")
+      .update({
+        payhere_payment_id: "320032555101", // <-- from PayHere dashboard
+        status: "pending",
+      })
+      .eq("id", bookingId);
+
     const payhereOrderId = `BOOKING_${bookingId}`;
 
     // 2️⃣ Save PayHere order id
