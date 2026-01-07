@@ -282,7 +282,6 @@ export default function AdsPage({ searchParams }: Props) {
     await supabase
       .from("bookings")
       .update({
-        payhere_payment_id: "320032555101", // <-- from PayHere dashboard
         status: "pending",
       })
       .eq("id", bookingId);
