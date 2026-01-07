@@ -17,6 +17,65 @@ import timezone from "dayjs/plugin/timezone";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
+/* ================= PAYHERE LINKS ================= */
+
+const PAYHERE_PAYMENT_LINKS: Record<number, string> = {
+  5000: "https://sandbox.payhere.lk/pay/o8c9ed68b",
+  4900: "https://sandbox.payhere.lk/pay/o15978731",
+  4800: "https://sandbox.payhere.lk/pay/o6290b7a7",
+  4700: "https://sandbox.payhere.lk/pay/ofcf42204",
+  4600: "https://sandbox.payhere.lk/pay/o8bf31292",
+  4500: "https://sandbox.payhere.lk/pay/o12fa4328",
+  4400: "https://sandbox.payhere.lk/pay/o65fd73be",
+  4300: "https://sandbox.payhere.lk/pay/ocfa5ce0a",
+  4200: "https://sandbox.payhere.lk/pay/ob8a2fe9c",
+  4100: "https://sandbox.payhere.lk/pay/o281de30d",
+  4000: "https://sandbox.payhere.lk/pay/o5f1ad39b",
+  3900: "https://sandbox.payhere.lk/pay/oc6138221",
+  3800: "https://sandbox.payhere.lk/pay/ob114b2b7",
+  3700: "https://sandbox.payhere.lk/pay/o2f702714",
+  3600: "https://sandbox.payhere.lk/pay/o58771782",
+  3500: "https://sandbox.payhere.lk/pay/oc17e4638",
+  3400: "https://sandbox.payhere.lk/pay/ob67976ae",
+  3300: "https://sandbox.payhere.lk/pay/od6beff4b",
+  3200: "https://sandbox.payhere.lk/pay/oa1b9cfdd",
+  3100: "https://sandbox.payhere.lk/pay/o3106d24c",
+  3000: "https://sandbox.payhere.lk/pay/o4601e2da",
+  2900: "https://sandbox.payhere.lk/pay/odf08b360",
+  2800: "https://sandbox.payhere.lk/pay/oa80f83f6",
+  2700: "https://sandbox.payhere.lk/pay/o366b1655",
+  2600: "https://sandbox.payhere.lk/pay/o416c26c3",
+  2500: "https://sandbox.payhere.lk/pay/od8657779",
+  2400: "https://sandbox.payhere.lk/pay/oaf6247ef",
+  2300: "https://sandbox.payhere.lk/pay/o5126e384",
+  2200: "https://sandbox.payhere.lk/pay/o2621d312",
+  2100: "https://sandbox.payhere.lk/pay/ob69ece83",
+  2000: "https://sandbox.payhere.lk/pay/oc199fe15",
+  1900: "https://sandbox.payhere.lk/pay/o5890afaf",
+  1800: "https://sandbox.payhere.lk/pay/o2f979f39",
+  1700: "https://sandbox.payhere.lk/pay/ob1f30a9a",
+  1600: "https://sandbox.payhere.lk/pay/oc6f43a0c",
+  1500: "https://sandbox.payhere.lk/pay/o5ffd6bb6",
+  1400: "https://sandbox.payhere.lk/pay/o28fa5b20",
+  1300: "https://sandbox.payhere.lk/pay/o483dd2c5",
+  1200: "https://sandbox.payhere.lk/pay/o3f3ae253",
+  1100: "https://sandbox.payhere.lk/pay/oaf85ffc2",
+  1000: "https://sandbox.payhere.lk/pay/o6aa6cd2d",
+  900: "https://sandbox.payhere.lk/pay/od882cf54",
+  800: "https://sandbox.payhere.lk/pay/o418b9eee",
+  700: "https://sandbox.payhere.lk/pay/o368cae78",
+  600: "https://sandbox.payhere.lk/pay/oa8e83bdb",
+  500: "https://sandbox.payhere.lk/pay/odfef0b4d",
+  400: "https://sandbox.payhere.lk/pay/o46e65af7",
+  300: "https://sandbox.payhere.lk/pay/o31e16a61",
+  200: "https://sandbox.payhere.lk/pay/o63108106",
+  100: "https://sandbox.payhere.lk/pay/o1417b190",
+};
+
+const getPaymentLink = (amount: number): string | null => {
+  return PAYHERE_PAYMENT_LINKS[amount] ?? null;
+};
+
 /* ================= TYPES ================= */
 
 type Ad = {
@@ -107,7 +166,7 @@ export default function AdsPage({ searchParams }: Props) {
       .select("slot_start")
       .eq("ad_id", selectedAd.id)
       .eq("slot_date", selectedDate)
-      .eq("status", "pending")
+      .eq("status", "completed")
       .then(({ data }) => {
         setBookedSlots(data ? data.map((b) => b.slot_start) : []);
       });
@@ -295,7 +354,14 @@ export default function AdsPage({ searchParams }: Props) {
       .eq("id", bookingId);
 
     // 3️⃣ REDIRECT TO PAYHERE PAYMENT LINK (🔥 THIS IS THE KEY 🔥)
-    window.location.href = "https://sandbox.payhere.lk/pay/o6aa6cd2d";
+    const paymentLink = getPaymentLink(totalPrice);
+
+    if (!paymentLink) {
+      alert("No payment option available for this amount");
+      return;
+    }
+
+    window.location.href = paymentLink;
   };
 
   /* ================= UI ================= */

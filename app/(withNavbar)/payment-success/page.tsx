@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
+import Link from "next/link";
 
 export default function PaymentSuccess() {
   const [status, setStatus] = useState<
@@ -9,45 +10,80 @@ export default function PaymentSuccess() {
   >("loading");
 
   useEffect(() => {
+    let retryTimer: NodeJS.Timeout;
+
     const checkStatus = async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("bookings")
         .select("status")
         .order("created_at", { ascending: false })
         .limit(1)
         .single();
 
-      if (!data) return;
+      if (error || !data) {
+        retryTimer = setTimeout(checkStatus, 2000);
+        return;
+      }
 
       if (data.status === "completed") {
         setStatus("success");
       } else if (data.status === "failed") {
         setStatus("failed");
       } else {
-        setTimeout(checkStatus, 2000);
+        retryTimer = setTimeout(checkStatus, 2000);
       }
     };
 
     checkStatus();
+
+    return () => clearTimeout(retryTimer);
   }, []);
 
-  if (status === "loading") {
-    return <p className="text-center mt-20">Processing payment…</p>;
-  }
+  /* ================= LOADING ================= */
 
-  if (status === "failed") {
+  if (status === "loading") {
     return (
       <div className="text-center mt-20">
-        <h1 className="text-2xl text-red-600">❌ Payment Failed</h1>
-        <p>Please try again.</p>
+        <p className="text-lg font-semibold">
+          Processing payment…
+        </p>
       </div>
     );
   }
 
+  /* ================= FAILED ================= */
+
+  if (status === "failed") {
+    return (
+      <div className="text-center mt-20 space-y-4">
+        <h1 className="text-2xl font-bold text-red-600">
+          ❌ Payment Failed
+        </h1>
+        <p>Please try again.</p>
+
+        <Link href="/">
+          <button className="btn btn-outline btn-primary">
+            Go to Home
+          </button>
+        </Link>
+      </div>
+    );
+  }
+
+  /* ================= SUCCESS ================= */
+
   return (
-    <div className="text-center mt-20">
-      <h1 className="text-2xl text-green-600">✅ Payment Successful</h1>
+    <div className="text-center mt-20 space-y-4">
+      <h1 className="text-2xl font-bold text-green-600">
+        ✅ Payment Successful
+      </h1>
       <p>Your booking is confirmed.</p>
+
+      <Link href="/">
+        <button className="btn btn-primary">
+          Go to Home
+        </button>
+      </Link>
     </div>
   );
 }
