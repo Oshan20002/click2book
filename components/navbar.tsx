@@ -99,6 +99,7 @@ export default function Navbar() {
       <div className="navbar-end gap-10">
         {user ? (
           <>
+            <button className="btn bg-red-600 text-white" onClick={() => router.push("/ActivityCenter")}>Activity Center</button>
             <p className="text-sm font-medium">{profile?.first_name + " " + profile?.last_name}</p>
             <button onClick={handleLogout} className="btn btn-error text-white">
               Logout
