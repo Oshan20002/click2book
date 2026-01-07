@@ -60,7 +60,7 @@ const PAYHERE_PAYMENT_LINKS: Record<number, string> = {
   1300: "https://sandbox.payhere.lk/pay/o483dd2c5",
   1200: "https://sandbox.payhere.lk/pay/o3f3ae253",
   1100: "https://sandbox.payhere.lk/pay/oaf85ffc2",
-  1000: "https://sandbox.payhere.lk/pay/o6aa6cd2d",
+  1000: "https://sandbox.payhere.lk/pay/ofb99e61d",
   900: "https://sandbox.payhere.lk/pay/od882cf54",
   800: "https://sandbox.payhere.lk/pay/o418b9eee",
   700: "https://sandbox.payhere.lk/pay/o368cae78",
