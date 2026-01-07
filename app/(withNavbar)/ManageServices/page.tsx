@@ -15,6 +15,8 @@ export default function ManageServices() {
     service_name: "",
     category: "",
     description: "",
+    city: "",
+    map_url: "",
   });
 
   // 🔐 Auth + Provider check + Fetch services
@@ -60,45 +62,40 @@ export default function ManageServices() {
       service_name: service.service_name,
       category: service.category,
       description: service.description,
+      city: service.city,
+      map_url: service.map_url,
     });
   };
 
   // 💾 Save Edit
-const saveEdit = async (id: string) => {
-  const { error } = await supabase
-    .from("services")
-    .update({
-      service_name: editForm.service_name,
-      category: editForm.category,
-      description: editForm.description,
-    })
-    .eq("id", id)
-    .eq("provider_id", user.id); // 🔥 REQUIRED FOR RLS
+  const saveEdit = async (id: string) => {
+    const { error } = await supabase
+      .from("services")
+      .update({
+        service_name: editForm.service_name,
+        category: editForm.category,
+        description: editForm.description,
+        city: editForm.city,
+        map_url: editForm.map_url,
+      })
+      .eq("id", id)
+      .eq("provider_id", user.id); // 🔒 RLS safe
 
-  if (error) {
-    console.error(error);
-    alert(error.message);
-    return;
-  }
+    if (error) {
+      alert(error.message);
+      return;
+    }
 
-  setServices(
-    services.map((s) =>
-      s.id === id ? { ...s, ...editForm } : s
-    )
-  );
+    setServices(services.map((s) => (s.id === id ? { ...s, ...editForm } : s)));
 
-  setEditingId(null);
-};
-
+    setEditingId(null);
+  };
 
   // 🗑 Delete service
   const deleteService = async (id: string) => {
     if (!confirm("Are you sure you want to delete this service?")) return;
 
-    const { error } = await supabase
-      .from("services")
-      .delete()
-      .eq("id", id);
+    const { error } = await supabase.from("services").delete().eq("id", id);
 
     if (error) {
       alert(error.message);
@@ -120,6 +117,8 @@ const saveEdit = async (id: string) => {
               <th>Service Name</th>
               <th>Category</th>
               <th>Description</th>
+              <th>City</th>
+              <th>Map</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -127,13 +126,17 @@ const saveEdit = async (id: string) => {
           <tbody>
             {services.map((service) => (
               <tr key={service.id}>
+                {/* Service Name */}
                 <td>
                   {editingId === service.id ? (
                     <input
                       className="input input-bordered w-full"
                       value={editForm.service_name}
                       onChange={(e) =>
-                        setEditForm({ ...editForm, service_name: e.target.value })
+                        setEditForm({
+                          ...editForm,
+                          service_name: e.target.value,
+                        })
                       }
                     />
                   ) : (
@@ -141,6 +144,7 @@ const saveEdit = async (id: string) => {
                   )}
                 </td>
 
+                {/* Category */}
                 <td>
                   {editingId === service.id ? (
                     <select
@@ -163,13 +167,17 @@ const saveEdit = async (id: string) => {
                   )}
                 </td>
 
+                {/* Description */}
                 <td>
                   {editingId === service.id ? (
                     <textarea
                       className="textarea textarea-bordered w-full"
                       value={editForm.description}
                       onChange={(e) =>
-                        setEditForm({ ...editForm, description: e.target.value })
+                        setEditForm({
+                          ...editForm,
+                          description: e.target.value,
+                        })
                       }
                     />
                   ) : (
@@ -177,6 +185,44 @@ const saveEdit = async (id: string) => {
                   )}
                 </td>
 
+                {/* City */}
+                <td>
+                  {editingId === service.id ? (
+                    <input
+                      className="input input-bordered w-full"
+                      value={editForm.city}
+                      onChange={(e) =>
+                        setEditForm({ ...editForm, city: e.target.value })
+                      }
+                    />
+                  ) : (
+                    service.city
+                  )}
+                </td>
+
+                {/* Map */}
+                <td>
+                  {editingId === service.id ? (
+                    <input
+                      type="url"
+                      className="input input-bordered w-full"
+                      value={editForm.map_url}
+                      onChange={(e) =>
+                        setEditForm({ ...editForm, map_url: e.target.value })
+                      }
+                    />
+                  ) : (
+                    <a
+                      href={service.map_url}
+                      target="_blank"
+                      className="link link-primary"
+                    >
+                      View Map
+                    </a>
+                  )}
+                </td>
+
+                {/* Actions */}
                 <td className="flex gap-2">
                   {editingId === service.id ? (
                     <>
@@ -206,7 +252,7 @@ const saveEdit = async (id: string) => {
                         onClick={() => deleteService(service.id)}
                       >
                         Delete
-                      </button>
+                      </button> 
                     </>
                   )}
                 </td>

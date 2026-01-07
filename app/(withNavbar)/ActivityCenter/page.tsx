@@ -12,6 +12,10 @@ type Booking = {
   total_price: number;
   ads: {
     title: string;
+    services?: {
+      city: string;
+      map_url: string;
+    };
   };
 };
 
@@ -23,9 +27,9 @@ export default function ActivityCenter() {
   const [profile, setProfile] = useState<Profile | null>(null);
 
   // MAIN TABS
-  const [activeTab, setActiveTab] = useState<
-    "my-bookings" | "my-services"
-  >("my-bookings");
+  const [activeTab, setActiveTab] = useState<"my-bookings" | "my-services">(
+    "my-bookings"
+  );
 
   // SUB TABS
   const [subTab, setSubTab] = useState<"ongoing" | "past">("ongoing");
@@ -53,7 +57,18 @@ export default function ActivityCenter() {
       // CUSTOMER BOOKINGS
       const { data: bookings } = await supabase
         .from("bookings")
-        .select("*, ads(title)")
+        .select(
+          `
+    *,
+    ads (
+      title,
+      services (
+        city,
+        map_url
+      )
+    )
+  `
+        )
         .eq("user_id", user.id)
         .order("slot_date", { ascending: false });
 
@@ -63,7 +78,19 @@ export default function ActivityCenter() {
       if (profileData?.role.includes("provider")) {
         const { data: services } = await supabase
           .from("bookings")
-          .select("*, ads!inner(title, provider_id)")
+          .select(
+            `
+    *,
+    ads!inner (
+      title,
+      provider_id,
+      services (
+        city,
+        map_url
+      )
+    )
+  `
+          )
           .eq("ads.provider_id", user.id)
           .order("slot_date", { ascending: false });
 
@@ -213,6 +240,20 @@ function ServiceOngoing({
             <p className="text-sm">
               {b.slot_date} | {b.slot_start} – {b.slot_end}
             </p>
+            {b.ads.services?.city && (
+              <p className="text-sm text-gray-500">📍 {b.ads.services.city}</p>
+            )}
+
+            {b.ads.services?.map_url && (
+              <a
+                href={b.ads.services.map_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link link-primary text-sm"
+              >
+                📍 View on Google Maps
+              </a>
+            )}
           </div>
 
           <button
@@ -241,11 +282,25 @@ function BookingList({ bookings }: { bookings: Booking[] }) {
               {b.slot_date} | {b.slot_start} – {b.slot_end}
             </p>
             <p className="text-sm capitalize">
-              Status : {b.status.replace("_", " ")}
+              Status : Payment {b.status.replace("_", " ")}
             </p>
+            <p className="font-bold">Rs {b.total_price}</p>
+
+            {b.ads.services?.city && (
+              <p className="text-sm text-gray-500">📍 {b.ads.services.city}</p>
+            )}
           </div>
 
-          <p className="font-bold">Rs {b.total_price}</p>
+          {b.ads.services?.map_url && (
+            <a
+              href={b.ads.services.map_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="link link-primary text-sm"
+            >
+              📍 View on Google Maps
+            </a>
+          )}
         </div>
       ))}
     </div>

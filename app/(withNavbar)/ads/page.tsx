@@ -84,10 +84,12 @@ type Ad = {
   category: string;
   description: string;
   price: number;
-  slot_start_time: string; // "09:00 AM"
-  slot_duration: number; // minutes
-  number_of_slots: number;
   banner_url?: string;
+
+  services?: {
+    city: string;
+    map_url: string;
+  };
 };
 
 type ExtraService = {
@@ -130,10 +132,18 @@ export default function AdsPage({ searchParams }: Props) {
 
     supabase
       .from("ads")
-      .select("*")
+      .select(
+        `
+      *,
+      services (
+        city,
+        map_url
+      )
+    `
+      )
       .eq("category", category)
-      .lte("ad_start_time", now) // ad already started
-      .gte("ad_end_time", now) // ad not expired
+      .lte("ad_start_time", now)
+      .gte("ad_end_time", now)
       .then(({ data, error }) => {
         if (error) {
           console.error(error);
@@ -379,7 +389,22 @@ export default function AdsPage({ searchParams }: Props) {
             <div className="card-body">
               <h2 className="card-title">{ad.title}</h2>
               <p>{ad.description}</p>
+              {ad.services?.city && (
+                <p className="text-sm text-gray-600">📍 {ad.services.city}</p>
+              )}
+
               <p className="font-bold">Rs {ad.price}</p>
+
+              {ad.services?.map_url && (
+                <a
+                  href={ad.services.map_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-outline btn-sm mb-2"
+                >
+                  📍 Find in Google Maps
+                </a>
+              )}
 
               <button
                 className="btn btn-primary"

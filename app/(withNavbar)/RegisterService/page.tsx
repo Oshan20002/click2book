@@ -16,6 +16,8 @@ export default function RegisterService() {
     service_name: "",
     description: "",
     category: "",
+    city: "",
+    map_url: "",
   });
 
   // 🔐 Auth + Provider Role Check
@@ -58,6 +60,8 @@ export default function RegisterService() {
       service_name: form.service_name,
       description: form.description,
       category: form.category,
+      city: form.city,
+      map_url: form.map_url,
     });
 
     if (error) {
@@ -84,9 +88,7 @@ export default function RegisterService() {
           placeholder="Service Name"
           className="input input-bordered w-full"
           value={form.service_name}
-          onChange={(e) =>
-            setForm({ ...form, service_name: e.target.value })
-          }
+          onChange={(e) => setForm({ ...form, service_name: e.target.value })}
           required
         />
 
@@ -94,18 +96,32 @@ export default function RegisterService() {
           placeholder="Service Description"
           className="textarea textarea-bordered w-full"
           value={form.description}
-          onChange={(e) =>
-            setForm({ ...form, description: e.target.value })
-          }
+          onChange={(e) => setForm({ ...form, description: e.target.value })}
+          required
+        />
+
+        <input
+          type="text"
+          placeholder="Located City"
+          className="input input-bordered w-full"
+          value={form.city}
+          onChange={(e) => setForm({ ...form, city: e.target.value })}
+          required
+        />
+
+        <input
+          type="url"
+          placeholder="Google Maps URL"
+          className="input input-bordered w-full"
+          value={form.map_url}
+          onChange={(e) => setForm({ ...form, map_url: e.target.value })}
           required
         />
 
         <select
           className="select select-bordered w-full"
           value={form.category}
-          onChange={(e) =>
-            setForm({ ...form, category: e.target.value })
-          }
+          onChange={(e) => setForm({ ...form, category: e.target.value })}
           required
         >
           <option value="" disabled>
