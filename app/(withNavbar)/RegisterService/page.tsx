@@ -12,13 +12,159 @@ export default function RegisterService() {
   const [profile, setProfile] = useState<any>(null);
   const [error, setError] = useState("");
 
+  const DISTRICTS = [
+    "Colombo",
+    "Gampaha",
+    "Kalutara",
+    "Kandy",
+    "Matale",
+    "Nuwara Eliya",
+    "Galle",
+    "Matara",
+    "Hambantota",
+    "Jaffna",
+    "Kilinochchi",
+    "Mannar",
+    "Mullaitivu",
+    "Vavuniya",
+    "Trincomalee",
+    "Batticaloa",
+    "Ampara",
+    "Kurunegala",
+    "Puttalam",
+    "Anuradhapura",
+    "Polonnaruwa",
+    "Badulla",
+    "Monaragala",
+    "Ratnapura",
+    "Kegalle",
+  ];
+
+  const CITIES = [
+    "Akkaraipattu",
+    "Akuressa",
+    "Aluthgama",
+    "Ambalangoda",
+    "Ambepussa",
+    "Ampara",
+    "Anuradhapura",
+    "Aralaganwila",
+    "Avissawella",
+    "Baddegama",
+    "Badulla",
+    "Balangoda",
+    "Bandaragama",
+    "Bandarawela",
+    "Batticaloa",
+    "Beliatta",
+    "Beruwala",
+    "Bibile",
+    "Chavakachcheri",
+    "Chilaw",
+    "Colombo",
+    "Dambulla",
+    "Dankotuwa",
+    "Dehiattakandiya",
+    "Dehiwala–Mount Lavinia",
+    "Delgoda",
+    "Deniyaya",
+    "Deraniyagala",
+    "Divulapitiya",
+    "Embilipitiya",
+    "Eppawala",
+    "Galle",
+    "Gampaha",
+    "Gampola",
+    "Girandurukotte",
+    "Hambantota",
+    "Haputale",
+    "Hatton",
+    "Hikkaduwa",
+    "Hokandara",
+    "Homagama",
+    "Horana",
+    "Ingiriya",
+    "Ja-Ela",
+    "Jaffna",
+    "Kadawatha",
+    "Kaduwela",
+    "Kalawana",
+    "Kalmunai",
+    "Kalpitiya",
+    "Kalutara",
+    "Kandy",
+    "Kantale",
+    "Karaitivu",
+    "Kattankudy",
+    "Kegalle",
+    "Kelaniya",
+    "Kesbewa",
+    "Kilinochchi",
+    "Kiribathgoda",
+    "Kochchikade",
+    "Koggala",
+    "Kolonnawa",
+    "Kotahena",
+    "Kuliyapitiya",
+    "Kurunegala",
+    "Maho",
+    "Maharagama",
+    "Mahiyanganaya",
+    "Malabe",
+    "Mannar",
+    "Marawila",
+    "Matale",
+    "Matara",
+    "Mawanella",
+    "Medawachchiya",
+    "Minuwangoda",
+    "Mirigama",
+    "Monaragala",
+    "Moratuwa",
+    "Mullaitivu",
+    "Nattandiya",
+    "Nawalapitiya",
+    "Negombo",
+    "Nochchiyagama",
+    "Nuwara Eliya",
+    "Padaviya",
+    "Panadura",
+    "Pelmadulla",
+    "Pilimathalawa",
+    "Point Pedro",
+    "Polgahawela",
+    "Polonnaruwa",
+    "Puttalam",
+    "Ragama",
+    "Ratnapura",
+    "Seeduwa",
+    "Siyambalanduwa",
+    "Talawakele",
+    "Tangalle",
+    "Thalawathugoda",
+    "Thambuttegama",
+    "Tissamaharama",
+    "Trincomalee",
+    "Udugama",
+    "Valaichchenai",
+    "Vavuniya",
+    "Wadduwa",
+    "Wattala",
+    "Weligama",
+    "Welimada",
+    "Wennappuwa",
+  ];
+
   const [form, setForm] = useState({
     service_name: "",
     description: "",
     category: "",
+    district: "",
     city: "",
     map_url: "",
   });
+
+  const [cityQuery, setCityQuery] = useState("");
 
   // 🔐 Auth + Provider Role Check
   useEffect(() => {
@@ -60,6 +206,7 @@ export default function RegisterService() {
       service_name: form.service_name,
       description: form.description,
       category: form.category,
+      district: form.district,
       city: form.city,
       map_url: form.map_url,
     });
@@ -100,14 +247,57 @@ export default function RegisterService() {
           required
         />
 
-        <input
-          type="text"
-          placeholder="Located City"
-          className="input input-bordered w-full"
-          value={form.city}
-          onChange={(e) => setForm({ ...form, city: e.target.value })}
+        <select
+          className="select select-bordered w-full"
+          value={form.district}
+          onChange={(e) =>
+            setForm({ ...form, district: e.target.value, city: "" })
+          }
           required
-        />
+        >
+          <option value="" disabled>
+            Select District
+          </option>
+          {DISTRICTS.map((d) => (
+            <option key={d} value={d}>
+              {d}
+            </option>
+          ))}
+        </select>
+
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search City"
+            className="input input-bordered w-full"
+            value={cityQuery}
+            onChange={(e) => {
+              setCityQuery(e.target.value);
+              setForm({ ...form, city: "" });
+            }}
+            disabled={!form.district}
+            required
+          />
+
+          {cityQuery && (
+            <ul className="absolute z-10 bg-base-100 border rounded w-full max-h-48 overflow-y-auto">
+              {CITIES.filter((city) =>
+                city.toLowerCase().startsWith(cityQuery.toLowerCase())
+              ).map((city) => (
+                <li
+                  key={city}
+                  className="px-3 py-2 hover:bg-base-200 cursor-pointer"
+                  onClick={() => {
+                    setForm({ ...form, city });
+                    setCityQuery(city);
+                  }}
+                >
+                  {city}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
 
         <input
           type="url"
