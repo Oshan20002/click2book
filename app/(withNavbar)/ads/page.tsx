@@ -1,6 +1,5 @@
 "use client";
 
-
 type Props = {
   searchParams: {
     category?: string;
@@ -16,11 +15,9 @@ import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 
-
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(isSameOrAfter);
-
 
 /* ================= PAYHERE LINKS ================= */
 
@@ -91,9 +88,16 @@ type Ad = {
   price: number;
   banner_url?: string;
 
+  service_id: string;
+
   services?: {
     city: string;
     map_url: string;
+  };
+
+  rating?: {
+    avg: number;
+    count: number;
   };
 };
 
@@ -107,6 +111,27 @@ type Slot = {
   start: string;
   end: string;
 };
+
+function StarRating({ value }: { value: number }) {
+  return (
+    <div className="flex items-center gap-1">
+      {[1, 2, 3, 4, 5].map((i) => (
+        <span
+          key={i}
+          className={`text-sm ${
+            value >= i
+              ? "text-yellow-400"
+              : value >= i - 0.5
+              ? "text-yellow-300"
+              : "text-gray-300"
+          }`}
+        >
+          ★
+        </span>
+      ))}
+    </div>
+  );
+}
 
 /* ================= COMPONENT ================= */
 
@@ -128,6 +153,12 @@ export default function AdsPage({ searchParams }: Props) {
   // Already booked slots (pending)
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
 
+  // VIEW ALL RATINGS
+  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
+    null
+  );
+  const [showRatingsModal, setShowRatingsModal] = useState(false);
+
   /* ================= FETCH ADS ================= */
 
   useEffect(() => {
@@ -139,13 +170,15 @@ export default function AdsPage({ searchParams }: Props) {
       .from("ads")
       .select(
         `
-      *,
-      services (
-        city,
-        map_url
+  *,
+  service_id,
+  services (
+    city,
+    map_url
+  )
+`
       )
-    `
-      )
+
       .eq("category", category)
       .lte("ad_start_time", now)
       .gte("ad_end_time", now)
@@ -159,6 +192,102 @@ export default function AdsPage({ searchParams }: Props) {
         setAds(data || []);
       });
   }, [category]);
+
+  /* ================= FETCH SERVICE RATINGS ================= */
+
+  useEffect(() => {
+    if (!ads.length) return;
+
+    const loadRatings = async () => {
+      const serviceIds = Array.from(new Set(ads.map((ad) => ad.service_id)));
+
+      const { data, error } = await supabase
+        .from("ratings")
+        .select("service_id, stars")
+        .in("service_id", serviceIds);
+
+      if (error || !data) return;
+
+      const ratingMap: Record<string, { sum: number; count: number }> = {};
+
+      data.forEach((r) => {
+        if (!ratingMap[r.service_id]) {
+          ratingMap[r.service_id] = { sum: 0, count: 0 };
+        }
+        ratingMap[r.service_id].sum += r.stars;
+        ratingMap[r.service_id].count += 1;
+      });
+
+      setAds((prev) =>
+        prev.map((ad) => {
+          const rating = ratingMap[ad.service_id];
+          if (!rating) return ad;
+
+          return {
+            ...ad,
+            rating: {
+              avg: rating.sum / rating.count,
+              count: rating.count,
+            },
+          };
+        })
+      );
+    };
+
+    loadRatings();
+  }, [ads.map((a) => a.id).join(",")]);
+
+  useEffect(() => {
+    if (!ads.length) return;
+
+    const testRatings = async () => {
+      console.log("==== RATING TEST START ====");
+
+      // 1️⃣ Show active ads + service IDs
+      ads.forEach((ad) => {
+        console.log("Ad:", ad.id, "Service:", ad.service_id);
+      });
+
+      // 2️⃣ Fetch ratings by service_id
+      const serviceIds = Array.from(new Set(ads.map((ad) => ad.service_id)));
+
+      console.log("Service IDs used for rating query:", serviceIds);
+
+      const { data, error } = await supabase
+        .from("ratings")
+        .select("service_id, stars")
+        .in("service_id", serviceIds);
+
+      if (error) {
+        console.error("Rating query error:", error);
+        return;
+      }
+
+      console.log("Raw ratings rows:", data);
+
+      // 3️⃣ Calculate averages
+      const ratingMap: Record<string, { sum: number; count: number }> = {};
+
+      data?.forEach((r) => {
+        if (!ratingMap[r.service_id]) {
+          ratingMap[r.service_id] = { sum: 0, count: 0 };
+        }
+        ratingMap[r.service_id].sum += r.stars;
+        ratingMap[r.service_id].count += 1;
+      });
+
+      console.log("Calculated rating map:", ratingMap);
+
+      // 4️⃣ Final averages
+      Object.entries(ratingMap).forEach(([sid, r]) => {
+        console.log(`Service ${sid} → Average = ${r.sum / r.count}`);
+      });
+
+      console.log("==== RATING TEST END ====");
+    };
+
+    testRatings();
+  }, [ads.map((a) => a.id).join(",")]);
 
   /* ================= FETCH EXTRA SERVICES ================= */
 
@@ -413,6 +542,28 @@ export default function AdsPage({ searchParams }: Props) {
             )}
             <div className="card-body">
               <h2 className="card-title">{ad.title}</h2>
+
+              {ad.rating ? (
+                <div className="flex items-center gap-2 mt-1 text-sm text-gray-600">
+                  <StarRating value={ad.rating.avg} />
+                  <span>
+                    {ad.rating.avg.toFixed(1)} ({ad.rating.count})
+                  </span>
+
+                  <button
+                    className="text-blue-600 underline ml-2"
+                    onClick={() => {
+                      setSelectedServiceId(ad.service_id);
+                      setShowRatingsModal(true);
+                    }}
+                  >
+                    View all ratings
+                  </button>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400 mt-1">No ratings yet</p>
+              )}
+
               <p>{ad.description}</p>
               {ad.services?.city && (
                 <p className="text-sm text-gray-600">📍 {ad.services.city}</p>
@@ -545,6 +696,76 @@ export default function AdsPage({ searchParams }: Props) {
           </div>
         </div>
       )}
+
+      {showRatingsModal && selectedServiceId && (
+        <RatingsModal
+          serviceId={selectedServiceId}
+          onClose={() => {
+            setShowRatingsModal(false);
+            setSelectedServiceId(null);
+          }}
+        />
+      )}
     </main>
+  );
+}
+
+function RatingsModal({
+  serviceId,
+  onClose,
+}: {
+  serviceId: string;
+  onClose: () => void;
+}) {
+  const [ratings, setRatings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadRatings = async () => {
+      const { data } = await supabase
+        .from("ratings")
+        .select("stars, comment, created_at")
+        .eq("service_id", serviceId)
+        .order("created_at", { ascending: false });
+
+      setRatings(data || []);
+      setLoading(false);
+    };
+
+    loadRatings();
+  }, [serviceId]);
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
+        <h2 className="text-xl font-bold mb-4">Service Ratings</h2>
+
+        {loading && <p>Loading...</p>}
+
+        {!loading && ratings.length === 0 && (
+          <p className="text-gray-500">No ratings yet.</p>
+        )}
+
+        <div className="space-y-4">
+          {ratings.map((r, idx) => (
+            <div key={idx} className="border-b pb-2">
+              <p className="font-semibold">⭐ {r.stars}</p>
+              {r.comment && (
+                <p className="text-sm text-gray-600">{r.comment}</p>
+              )}
+              <p className="text-xs text-gray-400">
+                {new Date(r.created_at).toLocaleDateString()}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex justify-end mt-4">
+          <button className="btn btn-outline" onClick={onClose}>
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
