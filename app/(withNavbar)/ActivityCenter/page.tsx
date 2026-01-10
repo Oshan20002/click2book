@@ -11,7 +11,10 @@ type Booking = {
   status: string;
   total_price: number;
   ads: {
+    id: string;
     title: string;
+    service_id: string;
+    provider_id?: string;
     services?: {
       city: string;
       map_url: string;
@@ -36,6 +39,7 @@ export default function ActivityCenter() {
 
   const [myBookings, setMyBookings] = useState<Booking[]>([]);
   const [myServices, setMyServices] = useState<Booking[]>([]);
+  const [ratingBooking, setRatingBooking] = useState<Booking | null>(null);
 
   /* ================= LOAD DATA ================= */
 
@@ -61,10 +65,12 @@ export default function ActivityCenter() {
           `
     *,
     ads (
-      title,
-      services (
-        city,
-        map_url
+      id,
+    title,
+    service_id,
+    services (
+      city,
+      map_url
       )
     )
   `
@@ -82,11 +88,13 @@ export default function ActivityCenter() {
             `
     *,
     ads!inner (
-      title,
-      provider_id,
-      services (
-        city,
-        map_url
+      id,
+  title,
+  service_id,
+  provider_id,
+  services (
+    city,
+    map_url
       )
     )
   `
@@ -197,8 +205,15 @@ export default function ActivityCenter() {
       </div>
 
       {/* CONTENT */}
-      {activeTab === "my-bookings" && (
+      {activeTab === "my-bookings" && subTab === "ongoing" && (
         <BookingList bookings={filterByTab(myBookings)} />
+      )}
+
+      {activeTab === "my-bookings" && subTab === "past" && (
+        <BookingList
+          bookings={filterByTab(myBookings)}
+          onRate={(b) => setRatingBooking(b)}
+        />
       )}
 
       {activeTab === "my-services" && (
@@ -214,6 +229,13 @@ export default function ActivityCenter() {
             <BookingList bookings={filterByTab(myServices)} />
           )}
         </>
+      )}
+
+      {ratingBooking && (
+        <RatingModal
+          booking={ratingBooking}
+          onClose={() => setRatingBooking(null)}
+        />
       )}
     </main>
   );
@@ -268,7 +290,13 @@ function ServiceOngoing({
   );
 }
 
-function BookingList({ bookings }: { bookings: Booking[] }) {
+function BookingList({
+  bookings,
+  onRate,
+}: {
+  bookings: Booking[];
+  onRate?: (b: Booking) => void;
+}) {
   if (bookings.length === 0)
     return <p className="text-gray-500">No records found.</p>;
 
@@ -285,6 +313,15 @@ function BookingList({ bookings }: { bookings: Booking[] }) {
               Status : Payment {b.status.replace("_", " ")}
             </p>
             <p className="font-bold">Rs {b.total_price}</p>
+
+            {onRate && (
+              <button
+                className="btn btn-sm btn-outline mt-2"
+                onClick={() => onRate(b)}
+              >
+                ⭐ Rate Service
+              </button>
+            )}
 
             {b.ads.services?.city && (
               <p className="text-sm text-gray-500">📍 {b.ads.services.city}</p>
@@ -303,6 +340,157 @@ function BookingList({ bookings }: { bookings: Booking[] }) {
           )}
         </div>
       ))}
+    </div>
+  );
+}
+
+function RatingModal({
+  booking,
+  onClose,
+}: {
+  booking: Booking;
+  onClose: () => void;
+}) {
+  const [stars, setStars] = useState(0);
+  const [comment, setComment] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [ratingId, setRatingId] = useState<string | null>(null);
+
+  /* ================= LOAD EXISTING RATING ================= */
+
+  useEffect(() => {
+    const loadExistingRating = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from("ratings")
+        .select("id, stars, comment")
+        .eq("booking_id", booking.id)
+        .eq("user_id", user.id)
+        .single();
+
+      // Ignore "no rows" error
+      if (error && error.code !== "PGRST116") {
+        console.error(error);
+        return;
+      }
+
+      if (data) {
+        setRatingId(data.id);
+        setStars(data.stars);
+        setComment(data.comment || "");
+      }
+    };
+
+    loadExistingRating();
+  }, [booking.id]);
+
+  /* ================= SUBMIT (INSERT / UPDATE) ================= */
+
+  const submitRating = async () => {
+    if (stars < 1) {
+      alert("Please select at least 1 star");
+      return;
+    }
+
+    setLoading(true);
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    let error;
+
+    if (ratingId) {
+      // UPDATE existing rating
+      const res = await supabase
+        .from("ratings")
+        .update({
+          stars,
+          comment,
+        })
+        .eq("id", ratingId)
+        .eq("user_id", user.id);
+
+      error = res.error;
+    } else {
+      // INSERT new rating
+      const res = await supabase.from("ratings").insert({
+        booking_id: booking.id,
+        ad_id: booking.ads.id,
+        service_id: booking.ads.service_id,
+        user_id: user.id,
+        stars,
+        comment,
+      });
+
+      error = res.error;
+    }
+
+    setLoading(false);
+
+    if (error) {
+      alert(error.message);
+    } else {
+      onClose();
+    }
+  };
+
+  /* ================= UI ================= */
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <h2 className="text-xl font-bold mb-4">
+          {ratingId ? "Edit Your Rating" : "Rate Service"}
+        </h2>
+
+        {/* STARS */}
+        <div className="flex gap-2 mb-4">
+          {[1, 2, 3, 4, 5].map((s) => (
+            <button
+              key={s}
+              onClick={() => setStars(s)}
+              className={`text-3xl ${
+                stars >= s ? "text-yellow-400" : "text-gray-300"
+              }`}
+            >
+              ★
+            </button>
+          ))}
+        </div>
+
+        {/* COMMENT */}
+        <textarea
+          placeholder="Write a comment (optional)"
+          className="textarea textarea-bordered w-full mb-4"
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+        />
+
+        {/* ACTIONS */}
+        <div className="flex justify-end gap-2">
+          <button className="btn btn-outline" onClick={onClose}>
+            Cancel
+          </button>
+          <button
+            className="btn btn-primary"
+            disabled={loading}
+            onClick={submitRating}
+          >
+            {ratingId ? "Update Rating" : "Submit Rating"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
