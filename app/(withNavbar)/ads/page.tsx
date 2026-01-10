@@ -1,5 +1,6 @@
 "use client";
 
+
 type Props = {
   searchParams: {
     category?: string;
@@ -13,9 +14,13 @@ import { supabase } from "@/lib/supabaseClient";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
+dayjs.extend(isSameOrAfter);
+
 
 /* ================= PAYHERE LINKS ================= */
 
@@ -284,14 +289,23 @@ export default function AdsPage({ searchParams }: Props) {
   useEffect(() => {
     if (!selectedAd) return;
 
+    const today = dayjs().tz("Asia/Colombo").startOf("day");
+
     supabase
       .from("ad_slot_schedules")
       .select("slot_date")
       .eq("ad_id", selectedAd.id)
       .then(({ data }) => {
-        const days = data?.map((d) => d.slot_date) || [];
-        setAvailableDays(days);
-        setSelectedDate(days[0] || "");
+        if (!data) return;
+
+        const validDays = data
+          .map((d) => d.slot_date)
+          .filter((date) =>
+            dayjs(date).tz("Asia/Colombo").isSameOrAfter(today)
+          );
+
+        setAvailableDays(validDays);
+        setSelectedDate(validDays[0] || "");
       });
   }, [selectedAd]);
 
@@ -316,6 +330,16 @@ export default function AdsPage({ searchParams }: Props) {
   const handleBooking = async () => {
     if (!selectedAd || !selectedSlot) return;
 
+    // 🚫 BLOCK PAST DATE BOOKINGS (FIX #2)
+    const bookingDay = dayjs(selectedDate).tz("Asia/Colombo").startOf("day");
+
+    const today = dayjs().tz("Asia/Colombo").startOf("day");
+
+    if (bookingDay.isBefore(today)) {
+      alert("You cannot book a past date");
+      return;
+    }
+
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -337,6 +361,7 @@ export default function AdsPage({ searchParams }: Props) {
         total_price: totalPrice,
         status: "pending",
       })
+
       .select("id")
       .single();
 
@@ -468,7 +493,18 @@ export default function AdsPage({ searchParams }: Props) {
 
             <div className="grid grid-cols-2 gap-2">
               {slots.map((s, i) => {
-                const isBooked = bookedSlots.includes(s.start);
+                const now = dayjs().tz("Asia/Colombo");
+
+                const slotDateTime = dayjs(
+                  `${selectedDate} ${s.start}`,
+                  "YYYY-MM-DD hh:mm A"
+                ).tz("Asia/Colombo");
+
+                const isPastSlot =
+                  dayjs(selectedDate).isSame(now, "day") &&
+                  slotDateTime.isBefore(now);
+
+                const isBooked = bookedSlots.includes(s.start) || isPastSlot;
 
                 return (
                   <button
