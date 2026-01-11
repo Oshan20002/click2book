@@ -187,7 +187,6 @@ const DISTRICT_CITY_MAP: Record<string, string[]> = {
     "Divulapitiya",
     "Ja-Ela",
     "Wattala",
-    "Ragama",
     "Seeduwa",
     "Kadawatha",
     "Kiribathgoda",
