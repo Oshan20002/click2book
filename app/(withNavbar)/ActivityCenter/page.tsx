@@ -109,7 +109,29 @@ export default function ActivityCenter() {
     load();
   }, []);
 
-  if (!profile) return <p className="p-10">Loading...</p>;
+  if (!profile) {
+    return (
+      <div className="p-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="card bg-base-100 shadow-md animate-pulse">
+              {/* Image placeholder */}
+              <div className="h-48 bg-gray-200 rounded-t-lg"></div>
+
+              {/* Content placeholder */}
+              <div className="card-body space-y-4">
+                <div className="h-5 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+
+                <div className="h-10 bg-gray-300 rounded mt-4"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const isProvider = profile.role.includes("provider");
 

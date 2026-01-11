@@ -742,7 +742,21 @@ function RatingsModal({
       <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[80vh] overflow-y-auto">
         <h2 className="text-xl font-bold mb-4">Service Ratings</h2>
 
-        {loading && <p>Loading...</p>}
+        {loading && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="card bg-base-100 shadow-md animate-pulse">
+                <div className="h-48 bg-gray-200 rounded-t-lg"></div>
+                <div className="card-body space-y-3">
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                  <div className="h-10 bg-gray-300 rounded mt-4"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {!loading && ratings.length === 0 && (
           <p className="text-gray-500">No ratings yet.</p>
