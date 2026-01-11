@@ -146,6 +146,58 @@ const CITIES = [
   "Wennappuwa",
 ];
 
+/* =========================
+  DISTRICT → CITY MAP
+========================= */
+
+const DISTRICT_CITY_MAP: Record<string, string[]> = {
+  Colombo: [
+    "Colombo",
+    "Dehiwala–Mount Lavinia",
+    "Moratuwa",
+    "Maharagama",
+    "Kaduwela",
+    "Malabe",
+    "Homagama",
+    "Kesbewa",
+    "Kolonnawa",
+    "Kotahena",
+    "Kochchikade",
+    "Kiribathgoda",
+    "Kelaniya",
+    "Wattala",
+    "Ragama",
+    "Ja-Ela",
+    "Kadawatha",
+    "Delgoda",
+    "Avissawella",
+    "Panadura",
+    "Horana",
+    "Bandaragama",
+    "Wadduwa",
+  ],
+  Gampaha: [
+    "Ragama",
+    "Gampaha",
+    "Negombo",
+    "Minuwangoda",
+    "Mirigama",
+    "Divulapitiya",
+    "Seeduwa",
+    "Kadawatha",
+    "Kiribathgoda",
+    "Kelaniya",
+    "Wennappuwa",
+    "Dankotuwa",
+    "Nattandiya",
+  ],
+  Kalutara: ["Kalutara", "Panadura", "Horana", "Bandaragama", "Wadduwa"],
+};
+
+/* =========================
+  KEYWORDS
+========================= */
+
 const KEYWORDS = [
   // 🏥 Health Care
   { keyword: "Doctor", category: "Health Care" },
@@ -193,7 +245,6 @@ const KEYWORDS = [
   { keyword: "Web development", category: "Technology" },
 ];
 
-
 export default function Home() {
   const router = useRouter();
 
@@ -204,135 +255,140 @@ export default function Home() {
     k.keyword.toLowerCase().includes(search.toLowerCase())
   ).slice(0, 8);
 
-
   const [keyword, setKeyword] = useState("");
   const [district, setDistrict] = useState("");
   const [citySearch, setCitySearch] = useState("");
   const [city, setCity] = useState("");
 
-  const filteredCities = CITIES.filter((c) =>
-    c.toLowerCase().includes(citySearch.toLowerCase())
-  );
+  const availableCities = district
+  ? DISTRICT_CITY_MAP[district] || []
+  : CITIES;
 
-const handleSearch = () => {
-  const params = new URLSearchParams();
+const filteredCities = availableCities.filter((c) =>
+  c.toLowerCase().includes(citySearch.toLowerCase())
+);
 
-  if (search) params.append("q", search);
-  if (selectedCategory) params.append("category", selectedCategory);
-  if (district) params.append("district", district);
-  if (city) params.append("city", city);
 
-  router.push(`/ads?${params.toString()}`);
-};
+  const handleSearch = () => {
+    const params = new URLSearchParams();
 
+    if (search) params.append("q", search);
+    if (selectedCategory) params.append("category", selectedCategory);
+    if (district) params.append("district", district);
+    if (city) params.append("city", city);
+
+    router.push(`/ads?${params.toString()}`);
+  };
 
   const browseCategory = (category: string) => {
     router.push(`/ads?category=${encodeURIComponent(category)}`);
   };
 
   return (
-<main className="bg-white">
-  {/* Hero Section */}
-  <div className="bg-blue-200 w-full min-h-screen px-6 py-16">
-    <h1 className="text-6xl text-center font-bold mt-10">
-      Book Any Service
-    </h1>
-    <h2 className="text-6xl text-center font-bold mt-5 text-slate-600">
-      Anytime, Anywhere
-    </h2>
-    <p className="text-2xl text-center max-w-4xl mx-auto mt-8">
-      Connect with trusted service providers across Sri Lanka.
-    </p>
+    <main className="bg-white">
+      {/* Hero Section */}
+      <div className="bg-blue-200 w-full min-h-screen px-6 py-16">
+        <h1 className="text-6xl text-center font-bold mt-10">
+          Book Any Service
+        </h1>
+        <h2 className="text-6xl text-center font-bold mt-5 text-slate-600">
+          Anytime, Anywhere
+        </h2>
+        <p className="text-2xl text-center max-w-4xl mx-auto mt-8">
+          Connect with trusted service providers across Sri Lanka.
+        </p>
 
-    <div className="max-w-5xl mx-auto mt-14 bg-white p-6 rounded-2xl shadow-lg grid grid-cols-1 md:grid-cols-4 gap-4 relative">
-      {/* Service search */}
-      <div className="relative">
-        <input
-          type="text"
-          required
-          placeholder="Search services (salon, tutor, plumber...)"
-          className="input input-bordered w-full"
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setSelectedCategory("");
-          }}
-        />
+        <div className="max-w-5xl mx-auto mt-14 bg-white p-6 rounded-2xl shadow-lg grid grid-cols-1 md:grid-cols-4 gap-4 relative">
+          {/* Service search */}
+          <div className="relative">
+            <input
+              type="text"
+              required
+              placeholder="Search services (salon, tutor, plumber...)"
+              className="input input-bordered w-full"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setSelectedCategory("");
+              }}
+            />
 
-        {search && keywordSuggestions.length > 0 && (
-          <ul className="absolute left-0 top-full z-50 bg-white border rounded-lg mt-1 w-full max-h-56 overflow-y-auto shadow-lg">
-            {keywordSuggestions.map((item) => (
-              <li
-                key={item.keyword}
-                className="px-4 py-2 hover:bg-blue-100 cursor-pointer"
-                onClick={() => {
-                  setSearch(item.keyword);
-                  setSelectedCategory(item.category);
-                }}
-              >
-                <span className="font-medium">{item.keyword}</span>
-                <span className="text-sm text-gray-500 ml-2">
-                  ({item.category})
-                </span>
-              </li>
+            {search && keywordSuggestions.length > 0 && (
+              <ul className="absolute left-0 top-full z-50 bg-white border rounded-lg mt-1 w-full max-h-56 overflow-y-auto shadow-lg">
+                {keywordSuggestions.map((item) => (
+                  <li
+                    key={item.keyword}
+                    className="px-4 py-2 hover:bg-blue-100 cursor-pointer"
+                    onClick={() => {
+                      setSearch(item.keyword);
+                      setSelectedCategory(item.category);
+                    }}
+                  >
+                    <span className="font-medium">{item.keyword}</span>
+                    <span className="text-sm text-gray-500 ml-2">
+                      ({item.category})
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* District */}
+          <select
+            className="select select-bordered w-full"
+            value={district}
+            onChange={(e) => {
+              setDistrict(e.target.value);
+              setCity("");
+              setCitySearch("");
+            }}
+          >
+            <option value="">All Districts</option>
+            {DISTRICTS.map((d) => (
+              <option key={d} value={d}>
+                {d}
+              </option>
             ))}
-          </ul>
-        )}
+          </select>
+
+          {/* City */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search city (optional)"
+              className="input input-bordered w-full"
+              value={citySearch}
+              onChange={(e) => {
+                setCitySearch(e.target.value);
+                setCity("");
+              }}
+            />
+
+            {citySearch && (
+              <ul className="absolute left-0 top-full z-40 bg-white border rounded-lg mt-1 max-h-48 overflow-y-auto w-full shadow-lg">
+                {filteredCities.slice(0, 8).map((c) => (
+                  <li
+                    key={c}
+                    className="px-3 py-2 hover:bg-blue-100 cursor-pointer"
+                    onClick={() => {
+                      setCity(c);
+                      setCitySearch(c);
+                    }}
+                  >
+                    {c}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* Button */}
+          <button className="btn btn-primary w-full" onClick={handleSearch}>
+            Search
+          </button>
+        </div>
       </div>
-
-      {/* District */}
-      <select
-        className="select select-bordered w-full"
-        value={district}
-        onChange={(e) => setDistrict(e.target.value)}
-      >
-        <option value="">All Districts</option>
-        {DISTRICTS.map((d) => (
-          <option key={d} value={d}>
-            {d}
-          </option>
-        ))}
-      </select>
-
-      {/* City */}
-      <div className="relative">
-        <input
-          type="text"
-          placeholder="Search city (optional)"
-          className="input input-bordered w-full"
-          value={citySearch}
-          onChange={(e) => {
-            setCitySearch(e.target.value);
-            setCity("");
-          }}
-        />
-
-        {citySearch && (
-          <ul className="absolute left-0 top-full z-40 bg-white border rounded-lg mt-1 max-h-48 overflow-y-auto w-full shadow-lg">
-            {filteredCities.slice(0, 8).map((c) => (
-              <li
-                key={c}
-                className="px-3 py-2 hover:bg-blue-100 cursor-pointer"
-                onClick={() => {
-                  setCity(c);
-                  setCitySearch(c);
-                }}
-              >
-                {c}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {/* Button */}
-      <button className="btn btn-primary w-full" onClick={handleSearch}>
-        Search
-      </button>
-    </div>
-  </div>
-
-
 
       {/* Browse by Category */}
       <section className="mt-20">
@@ -349,7 +405,6 @@ const handleSearch = () => {
             image="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/Images/helthcare.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZXMvaGVsdGhjYXJlLmpwZyIsImlhdCI6MTc2MTI4OTc2MywiZXhwIjoxODQ3Njg5NzYzfQ.WwdqaHdjiC14uHeq8Lex7EZ_9NHOr6KnPq7nNLarxq4"
             onClick={() => browseCategory("Health & Medical")}
           />
-
           {/* Education */}
           <CategoryCard
             title="Education"
@@ -357,7 +412,6 @@ const handleSearch = () => {
             image="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/Images/education.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZXMvZWR1Y2F0aW9uLmpwZyIsImlhdCI6MTc2MTI5MDEzMSwiZXhwIjoxNzkyODI2MTMxfQ.4868g02rfwRGp9oh-pJz1iBS2LwCsd4Fyv-d5dCECLY"
             onClick={() => browseCategory("Education & Tutoring")}
           />
-
           {/* Beauty */}
           <CategoryCard
             title="Beauty & Wellness"
@@ -365,7 +419,6 @@ const handleSearch = () => {
             image="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/Images/saloon.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZXMvc2Fsb29uLmpwZyIsImlhdCI6MTc2MTI5MDM4MiwiZXhwIjoxNzkyODI2MzgyfQ.Md4yFGP20W2bK1yTc9sY6JxixtTqb625-Q9Dk_fVdz8"
             onClick={() => browseCategory("Beauty & Wellness")}
           />
-
           {/* Home Services */}
           <CategoryCard
             title="Home Services"
@@ -373,7 +426,6 @@ const handleSearch = () => {
             image="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/Images/homeservice.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZXMvaG9tZXNlcnZpY2UuanBnIiwiaWF0IjoxNzYxMjkwOTYyLCJleHAiOjE3OTI4MjY5NjJ9.xwPueH2UnVuiBYPiTW9Evy0yB26Rx-ZYInwHmeKEaUg"
             onClick={() => browseCategory("Home Services")}
           />
-
           {/* Automotive */}
           <CategoryCard
             title="Pet & Animals"
@@ -381,7 +433,6 @@ const handleSearch = () => {
             image="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/Images/taxi.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZXMvdGF4aS5qcGciLCJpYXQiOjE3NjEyOTExMjMsImV4cCI6MTc5MjgyNzEyM30.Dr3Rn9E1BShrymodkCEz5sdQd29IphOwfIheG_LQN7g"
             onClick={() => browseCategory("Automotive")}
           />
-
           {/* Technology */}
           <CategoryCard
             title="Technology"
