@@ -162,35 +162,37 @@ export default function AdsPage({ searchParams }: Props) {
   /* ================= FETCH ADS ================= */
 
   useEffect(() => {
-    if (!category) return;
-
     const now = dayjs().tz("Asia/Colombo").toISOString();
 
-    supabase
+    let query = supabase
       .from("ads")
       .select(
         `
-  *,
-  service_id,
-  services (
-    city,
-    map_url
-  )
-`
+      *,
+      service_id,
+      services (
+        city,
+        map_url
       )
-
-      .eq("category", category)
+    `
+      )
       .lte("ad_start_time", now)
-      .gte("ad_end_time", now)
-      .then(({ data, error }) => {
-        if (error) {
-          console.error(error);
-          setAds([]);
-          return;
-        }
+      .gte("ad_end_time", now);
 
-        setAds(data || []);
-      });
+    // ✅ Apply category filter ONLY if category exists
+    if (category) {
+      query = query.eq("category", category);
+    }
+
+    query.then(({ data, error }) => {
+      if (error) {
+        console.error(error);
+        setAds([]);
+        return;
+      }
+
+      setAds(data || []);
+    });
   }, [category]);
 
   /* ================= FETCH SERVICE RATINGS ================= */
