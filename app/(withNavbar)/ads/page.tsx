@@ -3,6 +3,8 @@
 type Props = {
   searchParams: {
     category?: string;
+    district?: string;
+    city?: string;
   };
 };
 
@@ -137,6 +139,8 @@ function StarRating({ value }: { value: number }) {
 
 export default function AdsPage({ searchParams }: Props) {
   const category = searchParams.category ?? "";
+  const district = searchParams.district ?? "";
+  const city = searchParams.city ?? "";
 
   const [ads, setAds] = useState<Ad[]>([]);
   const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
@@ -179,9 +183,19 @@ export default function AdsPage({ searchParams }: Props) {
       .lte("ad_start_time", now)
       .gte("ad_end_time", now);
 
-    // ✅ Apply category filter ONLY if category exists
+    // ✅ category filter
     if (category) {
       query = query.eq("category", category);
+    }
+
+    // ✅ district filter (from ads table)
+    if (district) {
+      query = query.eq("district", district);
+    }
+
+    // ✅ city filter (from ads table)
+    if (city) {
+      query = query.eq("city", city);
     }
 
     query.then(({ data, error }) => {
@@ -193,7 +207,7 @@ export default function AdsPage({ searchParams }: Props) {
 
       setAds(data || []);
     });
-  }, [category]);
+  }, [category, district, city]);
 
   /* ================= FETCH SERVICE RATINGS ================= */
 

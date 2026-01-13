@@ -33,6 +33,8 @@ interface Service {
   id: string;
   service_name: string;
   category: string;
+  district: string;
+  city: string;
 }
 
 interface Ad {
@@ -176,6 +178,8 @@ export default function ServiceDetails() {
         title: form.title,
         description: form.description,
         category: service?.category,
+        district: service?.district,
+        city: service?.city,
         ad_start_time: dayjs
           .tz(form.ad_start_time, "Asia/Colombo")
           .utc()
