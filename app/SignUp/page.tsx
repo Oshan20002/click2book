@@ -35,8 +35,13 @@ export default function SignUp() {
       return;
     }
 
+    if (!form.firstName || !form.lastName || !form.email || !form.password) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
     // 1️⃣ Create auth user
-    const { data, error } = await supabase.auth.signUp({
+     const{ data, error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
     });
