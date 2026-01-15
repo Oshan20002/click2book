@@ -9,7 +9,6 @@ export default function Login() {
   const router = useRouter();
 
   const [form, setForm] = useState({
-    role: "customer",
     email: "",
     password: "",
     remember: true,
@@ -34,9 +33,6 @@ export default function Login() {
       alert(error.message);
       return;
     }
-
-    // Optional: store role in localStorage if needed
-    localStorage.setItem("role", form.role);
 
     alert("Login successful!");
     router.push("/Home"); // Redirect to your Home page
