@@ -106,7 +106,7 @@ export default function Login() {
 
           <p className="text-center mt-4">
             <u>
-              Don't have an account? <b><a href="/SignUp">SignUp here</a></b>
+              Dont have an account? <b><a href="/SignUp">SignUp here</a></b>
             </u>
           </p>
         </fieldset>
