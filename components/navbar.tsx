@@ -1,42 +1,45 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function Navbar() {
-  const pathname = usePathname();
   const router = useRouter();
-
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true); // ✅ Loading state
   const [categoriesOpen, setCategoriesOpen] = useState(false);
 
   useEffect(() => {
-    // 1. Get initial session
     const fetchUser = async () => {
-      const { data } = await supabase.auth.getUser(); // ✅ get user directly
+      setLoading(true); // start loading
+      const { data } = await supabase.auth.getUser();
       const currentUser = data.user ?? null;
       setUser(currentUser);
-      if (currentUser) await fetchUserProfile(currentUser.id);
+
+      if (currentUser) {
+        await fetchUserProfile(currentUser.id);
+      } else {
+        setProfile(null);
+      }
+      setLoading(false); // done loading
     };
+
     fetchUser();
 
-    // 2. Listen for auth state changes
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         const currentUser = session?.user ?? null;
         setUser(currentUser);
         if (currentUser) await fetchUserProfile(currentUser.id);
         else setProfile(null);
-      },
+      }
     );
 
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, []); // ⬅️ remove [pathname], just run once on mount
+    return () => listener.subscription.unsubscribe();
+  }, []);
 
   const fetchUserProfile = async (userId: string) => {
     const { data, error } = await supabase
@@ -45,11 +48,8 @@ export default function Navbar() {
       .eq("id", userId)
       .single();
 
-    if (error) {
-      console.error("Error fetching user profile:", error);
-    } else {
-      setProfile(data);
-    }
+    if (error) console.error("Error fetching user profile:", error);
+    else setProfile(data);
   };
 
   const handleLogout = async () => {
@@ -58,6 +58,15 @@ export default function Navbar() {
     setProfile(null);
     router.push("/Login");
   };
+
+  // ✅ Show loading spinner until auth is checked
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-24 bg-base-100">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="navbar bg-base-100 shadow-sm p-3 pl-10 pr-10">
@@ -72,7 +81,6 @@ export default function Navbar() {
           <li>
             <Link href="/">Home</Link>
           </li>
-
           <li>
             <details open={categoriesOpen}>
               <summary
@@ -83,7 +91,6 @@ export default function Navbar() {
               >
                 Categories
               </summary>
-
               <ul className="p-2 w-52 bg-base-100 rounded-box shadow z-50">
                 {[
                   "Health Care",
@@ -108,11 +115,9 @@ export default function Navbar() {
               </ul>
             </details>
           </li>
-
           <li>
             <Link href="/HowItWorks">How It Works</Link>
           </li>
-
           <li>
             <Link href="/About">About</Link>
           </li>
@@ -137,11 +142,9 @@ export default function Navbar() {
             >
               Activity Center
             </button>
-
             <p className="text-sm font-medium">
               {profile?.first_name} {profile?.last_name}
             </p>
-
             <button onClick={handleLogout} className="btn btn-error text-white">
               Logout
             </button>
@@ -151,7 +154,6 @@ export default function Navbar() {
             <Link href="/Login" className="btn">
               Login
             </Link>
-
             <Link href="/SignUp" className="btn bg-slate-600 text-white">
               SignUp
             </Link>
