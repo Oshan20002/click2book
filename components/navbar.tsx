@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function Navbar() {
-
   const pathname = usePathname();
   const router = useRouter();
 
@@ -15,46 +14,31 @@ export default function Navbar() {
   const [categoriesOpen, setCategoriesOpen] = useState(false);
 
   useEffect(() => {
-
-    const getSessionUser = async () => {
-      const { data } = await supabase.auth.getSession();
-      const sessionUser = data.session?.user ?? null;
-
-      setUser(sessionUser);
-
-      if (sessionUser) {
-        await fetchUserProfile(sessionUser.id);
-      } else {
-        setProfile(null);
-      }
+    // 1. Get initial session
+    const fetchUser = async () => {
+      const { data } = await supabase.auth.getUser(); // ✅ get user directly
+      const currentUser = data.user ?? null;
+      setUser(currentUser);
+      if (currentUser) await fetchUserProfile(currentUser.id);
     };
+    fetchUser();
 
-    getSessionUser();
-
+    // 2. Listen for auth state changes
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
-
-        const sessionUser = session?.user ?? null;
-        setUser(sessionUser);
-
-        if (sessionUser) {
-          await fetchUserProfile(sessionUser.id);
-        } else {
-          setProfile(null);
-        }
-
-      }
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
+        if (currentUser) await fetchUserProfile(currentUser.id);
+        else setProfile(null);
+      },
     );
 
     return () => {
       listener.subscription.unsubscribe();
     };
-
-  }, [pathname]); // ⭐ re-check auth on route change
-
+  }, []); // ⬅️ remove [pathname], just run once on mount
 
   const fetchUserProfile = async (userId: string) => {
-
     const { data, error } = await supabase
       .from("users")
       .select("*")
@@ -66,29 +50,25 @@ export default function Navbar() {
     } else {
       setProfile(data);
     }
-
   };
-
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    setUser(null);
+    setProfile(null);
     router.push("/Login");
   };
 
-
   return (
     <div className="navbar bg-base-100 shadow-sm p-3 pl-10 pr-10">
-
       <div className="navbar-start">
         <Link href="/" className="btn btn-ghost text-xl font-bold">
           Click2Book
         </Link>
       </div>
 
-
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1 gap-10 font-bold">
-
           <li>
             <Link href="/">Home</Link>
           </li>
@@ -105,7 +85,6 @@ export default function Navbar() {
               </summary>
 
               <ul className="p-2 w-52 bg-base-100 rounded-box shadow z-50">
-
                 {[
                   "Health Care",
                   "Education",
@@ -114,7 +93,6 @@ export default function Navbar() {
                   "Pet & Animals",
                   "Technology",
                 ].map((cat) => (
-
                   <li key={cat}>
                     <button
                       className="w-full text-left px-2 py-1 hover:bg-base-200 rounded"
@@ -126,9 +104,7 @@ export default function Navbar() {
                       {cat}
                     </button>
                   </li>
-
                 ))}
-
               </ul>
             </details>
           </li>
@@ -140,10 +116,8 @@ export default function Navbar() {
           <li>
             <Link href="/About">About</Link>
           </li>
-
         </ul>
       </div>
-
 
       {profile?.role === "provider" && (
         <button
@@ -154,12 +128,9 @@ export default function Navbar() {
         </button>
       )}
 
-
       <div className="navbar-end gap-10">
-
         {user ? (
           <>
-
             <button
               className="btn bg-red-600 text-white"
               onClick={() => router.push("/ActivityCenter")}
@@ -171,17 +142,12 @@ export default function Navbar() {
               {profile?.first_name} {profile?.last_name}
             </p>
 
-            <button
-              onClick={handleLogout}
-              className="btn btn-error text-white"
-            >
+            <button onClick={handleLogout} className="btn btn-error text-white">
               Logout
             </button>
-
           </>
         ) : (
           <>
-
             <Link href="/Login" className="btn">
               Login
             </Link>
@@ -189,12 +155,9 @@ export default function Navbar() {
             <Link href="/SignUp" className="btn bg-slate-600 text-white">
               SignUp
             </Link>
-
           </>
         )}
-
       </div>
-
     </div>
   );
 }
