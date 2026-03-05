@@ -30,7 +30,7 @@ export default function Navbar() {
         setProfile(null);
       }
 
-      // Artificial 5-second delay
+      // Artificial 1-second delay
       setTimeout(() => {
         if (isMounted) setLoading(false);
       }, 1000);

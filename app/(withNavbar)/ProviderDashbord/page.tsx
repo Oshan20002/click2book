@@ -29,46 +29,59 @@ export default function ProviderDashboard() {
   const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // ✅ Function to check active session
+  const checkActiveSession = async () => {
+    setLoading(true);
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    const user = sessionData.session?.user;
+
+    if (!user) {
+      router.push("/Login");
+      return;
+    }
+
+    // Fetch profile
+    const { data: profileData, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    if (error || !profileData || profileData.role !== "provider") {
+      router.push("/"); // Not a provider
+      return;
+    }
+
+    setProfile(profileData);
+
+    // Fetch services for this provider
+    const { data: servicesData } = await supabase
+      .from("services")
+      .select("*")
+      .eq("provider_id", user.id)
+      .order("created_at", { ascending: false });
+
+    setServices(servicesData || []);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      const { data } = await supabase.auth.getUser();
+    checkActiveSession();
+  }, []);
 
-      if (!data.user) {
-        router.push("/Login");
-        return;
-      }
-
-      const { data: profileData } = await supabase
-        .from("users")
-        .select("*")
-        .eq("id", data.user.id)
-        .single();
-
-      if (!profileData || profileData.role !== "provider") {
-        router.push("/");
-        return;
-      }
-
-      setProfile(profileData);
-
-      const { data: servicesData } = await supabase
-        .from("services")
-        .select("*")
-        .eq("provider_id", data.user.id)
-        .order("created_at", { ascending: false });
-
-      setServices(servicesData || []);
-      setLoading(false);
-    };
-
-    fetchData();
-  }, [router]);
-
-  if (loading) return <p className="text-center mt-10">Loading...</p>;
+  if (loading)
+    return (
+      <div className="text-center mt-10">
+        <p>Loading Provider Dashboard...</p>
+      </div>
+    );
 
   return (
     <div className="max-w-6xl mx-auto mt-10 p-6 border rounded-md shadow-md">
-      <h1 className="text-2xl font-bold">Provider Dashboard</h1>
+      <h1 className="text-2xl font-bold">
+        Provider Dashboard
+      </h1>
       <p className="text-gray-600 mb-6">
         Welcome, {profile.first_name} {profile.last_name}
       </p>
@@ -91,25 +104,17 @@ export default function ProviderDashboard() {
           {services.map((service) => (
             <div
               key={service.id}
-              onClick={() =>
-                router.push(`/${service.id}`)
-              }
+              onClick={() => router.push(`/${service.id}`)}
               className="cursor-pointer border rounded-lg overflow-hidden shadow hover:shadow-lg transition"
             >
               <img
-                src={categoryImages[service.category]}
+                src={categoryImages[service.category] || ""}
                 className="h-40 w-full object-cover"
               />
               <div className="p-4">
-                <h3 className="font-bold text-lg">
-                  {service.service_name}
-                </h3>
-                <p className="text-sm text-gray-600">
-                  {service.category}
-                </p>
-                <p className="text-sm mt-1">
-                  {service.description}
-                </p>
+                <h3 className="font-bold text-lg">{service.service_name}</h3>
+                <p className="text-sm text-gray-600">{service.category}</p>
+                <p className="text-sm mt-1">{service.description}</p>
               </div>
             </div>
           ))}
