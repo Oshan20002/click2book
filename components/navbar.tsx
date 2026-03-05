@@ -13,24 +13,34 @@ export default function Navbar() {
   const [loading, setLoading] = useState(true);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
 
+  // Fetch user session and profile
   useEffect(() => {
-    let isMounted = true;
+    let isMounted = true; // Prevent state updates after unmount
 
     const initAuth = async () => {
+      setLoading(true);
+
+      // Get current user
       const { data } = await supabase.auth.getUser();
       const currentUser = data.user ?? null;
-
       if (!isMounted) return;
 
       setUser(currentUser);
 
       if (currentUser) {
-        await fetchUserProfile(currentUser.id);
+        const { data: profileData, error } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", currentUser.id)
+          .single();
+        if (!isMounted) return;
+
+        if (!error && profileData) setProfile(profileData);
       } else {
         setProfile(null);
       }
 
-      // Artificial 1-second delay
+      // Artificial delay (optional)
       setTimeout(() => {
         if (isMounted) setLoading(false);
       }, 1000);
@@ -38,6 +48,7 @@ export default function Navbar() {
 
     initAuth();
 
+    // Listen for auth state changes (login/logout)
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         if (!isMounted) return;
@@ -45,8 +56,18 @@ export default function Navbar() {
         const currentUser = session?.user ?? null;
         setUser(currentUser);
 
-        if (currentUser) await fetchUserProfile(currentUser.id);
-        else setProfile(null);
+        if (currentUser) {
+          const { data: profileData, error } = await supabase
+            .from("users")
+            .select("*")
+            .eq("id", currentUser.id)
+            .single();
+          if (!isMounted) return;
+
+          if (!error && profileData) setProfile(profileData);
+        } else {
+          setProfile(null);
+        }
       }
     );
 
@@ -56,17 +77,6 @@ export default function Navbar() {
     };
   }, []);
 
-  const fetchUserProfile = async (userId: string) => {
-    const { data, error } = await supabase
-      .from("users")
-      .select("*")
-      .eq("id", userId)
-      .single();
-
-    if (error) console.error("Error fetching user profile:", error);
-    else setProfile(data);
-  };
-
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -74,40 +84,36 @@ export default function Navbar() {
     router.push("/Login");
   };
 
+  // Navbar Loading UI
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-24 bg-base-100">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+        <span className="ml-2">Loading...</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="navbar bg-base-100 shadow-sm p-3 pl-10 pr-10">
-      {/* Start */}
+    <div className="navbar bg-base-100 shadow-sm p-3 pl-10 pr-10 ">
+      {/* Navbar start */}
       <div className="navbar-start">
         <Link href="/" className="btn btn-ghost text-xl font-bold">
           Click2Book
         </Link>
       </div>
 
-      {/* Center menu */}
+      {/* Navbar center */}
       <div className="navbar-center hidden lg:flex">
-        <ul className="menu menu-horizontal px-1 gap-10 font-bold">
-          <li>
-            <Link href="/">Home</Link>
-          </li>
+        <ul className="menu menu-horizontal px-1 gap-8 font-bold">
+          <li><Link href="/">Home</Link></li>
           <li>
             <details open={categoriesOpen}>
-              <summary
-                onClick={(e) => {
-                  e.preventDefault();
-                  setCategoriesOpen((prev) => !prev);
-                }}
-              >
+              <summary onClick={(e) => { e.preventDefault(); setCategoriesOpen(!categoriesOpen); }}>
                 Categories
               </summary>
               <ul className="p-2 w-52 bg-base-100 rounded-box shadow z-50">
-                {[
-                  "Health Care",
-                  "Education",
-                  "Beauty & Wellness",
-                  "Home Services",
-                  "Pet & Animals",
-                  "Technology",
-                ].map((cat) => (
+                {["Health Care","Education","Beauty & Wellness","Home Services","Pet & Animals","Technology"].map((cat) => (
                   <li key={cat}>
                     <button
                       className="w-full text-left px-2 py-1 hover:bg-base-200 rounded"
@@ -123,34 +129,23 @@ export default function Navbar() {
               </ul>
             </details>
           </li>
-          <li>
-            <Link href="/HowItWorks">How It Works</Link>
-          </li>
-          <li>
-            <Link href="/About">About</Link>
-          </li>
+          <li><Link href="/HowItWorks">How It Works</Link></li>
+          <li><Link href="/About">About</Link></li>
         </ul>
       </div>
 
-      {/* Provider Dashboard */}
-      {profile?.role === "provider" && (
-        <button
-          className="btn btn-primary"
-          onClick={() => router.push("/ProviderDashbord")}
-        >
-          Provider Dashboard
-        </button>
-      )}
-
-      {/* End menu */}
+      {/* Navbar end */}
       <div className="navbar-end gap-4 flex items-center">
-        {loading ? (
-          <div className="flex gap-2 items-center">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-            <span>Loading...</span>
-          </div>
-        ) : user ? (
+        {user ? (
           <>
+            {profile?.role === "provider" && (
+              <button
+                className="btn btn-primary"
+                onClick={() => router.push("/ProviderDashbord")}
+              >
+                Provider Dashboard
+              </button>
+            )}
             <button
               className="btn bg-red-600 text-white"
               onClick={() => router.push("/ActivityCenter")}
@@ -169,12 +164,8 @@ export default function Navbar() {
           </>
         ) : (
           <>
-            <Link href="/Login" className="btn">
-              Login
-            </Link>
-            <Link href="/SignUp" className="btn bg-slate-600 text-white">
-              SignUp
-            </Link>
+            <Link href="/Login" className="btn">Login</Link>
+            <Link href="/SignUp" className="btn bg-slate-600 text-white">SignUp</Link>
           </>
         )}
       </div>
