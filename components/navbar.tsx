@@ -1,42 +1,60 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function Navbar() {
-  const pathname = usePathname();
   const router = useRouter();
 
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
 
   useEffect(() => {
-    // 1. Get initial session
-    const fetchUser = async () => {
-      const { data } = await supabase.auth.getUser(); // ✅ get user directly
-      const currentUser = data.user ?? null;
-      setUser(currentUser);
-      if (currentUser) await fetchUserProfile(currentUser.id);
-    };
-    fetchUser();
+    let isMounted = true;
 
-    // 2. Listen for auth state changes
+    const initAuth = async () => {
+      const { data } = await supabase.auth.getUser();
+      const currentUser = data.user ?? null;
+
+      if (!isMounted) return;
+
+      setUser(currentUser);
+
+      if (currentUser) {
+        await fetchUserProfile(currentUser.id);
+      } else {
+        setProfile(null);
+      }
+
+      // Artificial 5-second delay
+      setTimeout(() => {
+        if (isMounted) setLoading(false);
+      }, 1000);
+    };
+
+    initAuth();
+
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
+        if (!isMounted) return;
+
         const currentUser = session?.user ?? null;
         setUser(currentUser);
+
         if (currentUser) await fetchUserProfile(currentUser.id);
         else setProfile(null);
-      },
+      }
     );
 
     return () => {
+      isMounted = false;
       listener.subscription.unsubscribe();
     };
-  }, []); // ⬅️ remove [pathname], just run once on mount
+  }, []);
 
   const fetchUserProfile = async (userId: string) => {
     const { data, error } = await supabase
@@ -45,11 +63,8 @@ export default function Navbar() {
       .eq("id", userId)
       .single();
 
-    if (error) {
-      console.error("Error fetching user profile:", error);
-    } else {
-      setProfile(data);
-    }
+    if (error) console.error("Error fetching user profile:", error);
+    else setProfile(data);
   };
 
   const handleLogout = async () => {
@@ -61,18 +76,19 @@ export default function Navbar() {
 
   return (
     <div className="navbar bg-base-100 shadow-sm p-3 pl-10 pr-10">
+      {/* Start */}
       <div className="navbar-start">
         <Link href="/" className="btn btn-ghost text-xl font-bold">
           Click2Book
         </Link>
       </div>
 
+      {/* Center menu */}
       <div className="navbar-center hidden lg:flex">
         <ul className="menu menu-horizontal px-1 gap-10 font-bold">
           <li>
             <Link href="/">Home</Link>
           </li>
-
           <li>
             <details open={categoriesOpen}>
               <summary
@@ -83,7 +99,6 @@ export default function Navbar() {
               >
                 Categories
               </summary>
-
               <ul className="p-2 w-52 bg-base-100 rounded-box shadow z-50">
                 {[
                   "Health Care",
@@ -108,17 +123,16 @@ export default function Navbar() {
               </ul>
             </details>
           </li>
-
           <li>
             <Link href="/HowItWorks">How It Works</Link>
           </li>
-
           <li>
             <Link href="/About">About</Link>
           </li>
         </ul>
       </div>
 
+      {/* Provider Dashboard */}
       {profile?.role === "provider" && (
         <button
           className="btn btn-primary"
@@ -128,8 +142,14 @@ export default function Navbar() {
         </button>
       )}
 
-      <div className="navbar-end gap-10">
-        {user ? (
+      {/* End menu */}
+      <div className="navbar-end gap-4 flex items-center">
+        {loading ? (
+          <div className="flex gap-2 items-center">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+            <span>Loading...</span>
+          </div>
+        ) : user ? (
           <>
             <button
               className="btn bg-red-600 text-white"
@@ -137,12 +157,13 @@ export default function Navbar() {
             >
               Activity Center
             </button>
-
             <p className="text-sm font-medium">
               {profile?.first_name} {profile?.last_name}
             </p>
-
-            <button onClick={handleLogout} className="btn btn-error text-white">
+            <button
+              onClick={handleLogout}
+              className="btn btn-error text-white"
+            >
               Logout
             </button>
           </>
@@ -151,7 +172,6 @@ export default function Navbar() {
             <Link href="/Login" className="btn">
               Login
             </Link>
-
             <Link href="/SignUp" className="btn bg-slate-600 text-white">
               SignUp
             </Link>
