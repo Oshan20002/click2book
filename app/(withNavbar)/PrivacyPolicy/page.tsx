@@ -3,95 +3,107 @@ import React from "react";
 export default function PrivacyPolicy() {
     return (
         <main className="w-full min-h-screen bg-base-100">
-            <h1 className="text-4xl font-bold text-center my-8">Privacy Policy</h1>
-            <p className="text-gray-500 text-center mb-12">Last updated: January 2026</p>
+            <div className="max-w-4xl mx-auto p-6">
+                <h1 className="text-4xl font-bold text-center mb-4">Cick2Book Privacy Policy</h1>
+                <p className="text-center text-gray-500 mb-12">Last updated: March 2026</p>
 
-            <section className="max-w-4xl mx-auto px-4">
-                <div>
-                    <h4 className="text-2xl font-semibold mb-4">1. Introduction</h4>
-                    <p className="mb-6">
-                        Click2Book respects your privacy and is committed to protecting
-                        your personal data. This Privacy Policy explains how we collect,
-                        use, and protect your information when you use our website and
-                        services.
-                    </p>
-                </div>
+                <section className="mb-10">
+                    <h2 className="text-2xl font-semibold mb-4">1. Introduction</h2>
+                    <p>Click2Book us respects your privacy and is committed to protecting your personal information. This PrivacyPolicy explains how we collect, use, disclose, and safeguard your information when you use the Click2Book platform and services.
+                    <br /><br />
+                    By using our website and services, you agree to the collection and use of information in accordance with this policy.</p>
+                </section>
 
-                <div>
-                    <h4 className="text-2xl font-semibold mb-4">2. Information We Collect</h4>
-                    <ul>
+                <section className="mb-10">
+                    <h2 className="text-2xl font-semibold mb-4">2. Information We Collect</h2>
+                    <p className="text-gray-700 mb-4">We may collect the following types of information when you use our services:</p>
+                    <ul className="list-disc pl-6 space-y-2 text-gray-700">
                         <li>Full Name</li>
                         <li>Email Address</li>
                         <li>Phone Number</li>
-                        <li>Location and address details</li>
-                        <li>Booking Details and service preferences</li>
-                        <li>Login and authentication data</li>
+                        <li>Location or Address details</li>
+                        <li>Booking details and service preferences</li>
+                        <li>Login credentials and authentication data</li>
+                        <li>Device and browser information</li>
+                        <li>Cookies and usage data</li>
                     </ul>
-                </div>
+                </section>
 
-                <div>
-                    <h4 className="text-2xl font-semibold mb-4">3. How We Use Your Information</h4>
-                    <ul>
-                        <li>To manage user accounts</li>
+                <section className="mb-10">
+                    <h2 className="text-2xl font-semibold mb-4">3. How We Use Your Information</h2>
+                    <ul className="list-disc pl-6 space-y-2 text-gray-700">
+                        <li>To create and manage your account</li>
                         <li>To process service bookings</li>
-                        <li>To send confirmations and updates</li>
-                        <li>To improve our services</li>
-                        <li>To maintain platform security</li>
+                        <li>To send booking confirmations and updates</li>
+                        <li>To improve our platform and services</li>
+                        <li>To ensure platform security and prevent fraud</li>
+                        <li>To provide customer support</li>
                     </ul>
-                </div>
+                </section>
 
-                <div>
-                    <h4 className="text-2xl font-semibold mb-4">4. Data Sharing and Disclosure</h4>
-                    <p className="mb-6">
-                        We do not sell or rent your personal data. Information may only be
-                        shared with service providers involved in fulfilling bookings or
-                        trusted third-party services required to operate the platform.
+                <section className="mb-10">
+                    <h2 className="text-2xl font-semibold mb-4">4. Information Sharing and Disclosure</h2>
+                    <p className="text-gray-700 leading-relaxed">
+                        We do not sell or rent your personal data. However, we may share information with trusted third parties who help operate our platform, such as service providers, hosting providers, email services, or analytics tools.<br /><br />
+                        Information may also be disclosed if required by law or to protect the safety and security of our users and platform.
                     </p>
-                </div>
+                </section>
 
-                <div>
-                    <h4 className="text-2xl font-semibold mb-4">5. Data Security</h4>
-                    <p className="mb-6">
-                        We take appropriate measures to protect your data. However, no
-                        online platform can guarantee complete security.
+                <section className="mb-10">
+                    <h2 className="text-2xl font-semibold mb-4">5. Data Security</h2>
+                    <p className="text-gray-700 leading-relaxed">
+                        We implement appropriate technical and organizational measures to protect your personal data from unauthorized access, alteration, or disclosure. However, no internet-based platform can guarantee complete security.
                     </p>
-                </div>
+                </section>
 
-                <div>
-                    <h4 className="text-2xl font-semibold mb-4">6. Cookies and Tracking Technologies</h4>
-                    <p className="mb-6">
-                        We use cookies and similar tracking technologies to enhance your experience
-                        on our platform. You can manage your cookie preferences through your browser settings.
+                <section className="mb-10">
+                    <h2 className="text-2xl font-semibold mb-4">6. Cookies and Tracking Technologies</h2>
+                    <p className="text-gray-700 leading-relaxed">
+                        Click2Book may use cookies and similar tracking technologies to improve functionality, analyze website usage, and enhance user experience. Users can manage or disable cookies through their browser settings.
                     </p>
-                </div>
+                </section>
 
-                <div>
-                    <h4 className="text-2xl font-semibold mb-4">7. Your Rights</h4>
-                    <p className="mb-6">
-                        You have the right to access, correct, or delete your personal data.
-                        You may also object to or restrict certain processing of your data.
+                <section className="mb-10">
+                    <h2 className="text-2xl font-semibold mb-4">7. Data Retention</h2>
+                    <p className="text-gray-700 leading-relaxed">
+                        We retain personal data only for as long as necessary to provide our services and comply with legal obligations. When an account is deleted, personal data will be removed or anonymized where possible.
                     </p>
-                </div>
+                </section>
 
-                <div>
-                    <h4 className="text-2xl font-semibold mb-4">8. Changes to This Privacy Policy</h4>
-                    <p className="mb-6">
-                        We may update this Privacy Policy from time to time. We will notify
-                        you of any significant changes by posting the new policy on this page.
+                <section className="mb-10">
+                    <h2 className="text-2xl font-semibold mb-4">8. Your Rights</h2>
+                    <p className="text-gray-700 leading-relaxed">
+                        Users may have the right to access, update, or delete their personal information. Users may also request restrictions on how their data is processed by contacting us directly.
                     </p>
-                </div>
 
-                <div>
-                    <h4 className="text-2xl font-semibold mb-4">9. Contact Us</h4>
-                    <p className="mb-6">
-                        If you have any questions or concerns about this Privacy Policy,
-                        please contact us at:
+                </section>
+
+                <section className="mb-10">
+                    <h2 className="text-2xl font-semibold mb-4">9. Children's Privacy</h2>
+                    <p className="text-gray-700 leading-relaxed">
+                        Click2Book services are not intended for individuals under the age of 13. We do not knowingly collect personal information from children.
                     </p>
-                </div>
+                </section>
 
-            </section>
-                
+                <section className="mb-10">
+                    <h2 className="text-2xl font-semibold mb-4">10. Changes to This Privacy Policy</h2>
+                    <p className="text-gray-700 leading-relaxed">
+                        We may update this Privacy Policy from time to time. We will notify users of any changes by posting the new policy on this page and updating the "Last updated" date at the top.
+                    </p>
 
+                </section>
+
+                <section className="mb-10">
+                    <h2 className="text-2xl font-semibold mb-4">11. Contact Us</h2>
+                    <p className="text-gray-700 leading-relaxed">
+                        If you have any questions about this Privacy Policy, please contact us.
+                    </p>
+
+                </section>
+
+
+
+            </div>
         </main>
     )
 }
