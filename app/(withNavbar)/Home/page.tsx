@@ -691,7 +691,7 @@ const filteredCities = availableCities.filter((c) =>
   return (
     <main className="bg-white">
       {/* Hero Section */}
-      <div className="bg-blue-200 w-full min-h-screen px-6 py-16">
+      <div className="bg-blue-200 w-full min-h-screen px-6 py-16 ">
         <h1 className="text-6xl text-center font-bold mt-10">
           Book Any Service
         </h1>
@@ -701,6 +701,7 @@ const filteredCities = availableCities.filter((c) =>
         <p className="text-2xl text-center max-w-4xl mx-auto mt-8">
           Connect with trusted service providers across Sri Lanka.
         </p>
+        
 
         <div className="max-w-5xl mx-auto mt-14 bg-white p-6 rounded-2xl shadow-lg grid grid-cols-1 md:grid-cols-4 gap-4 relative">
           {/* Service search */}
@@ -792,16 +793,18 @@ const filteredCities = availableCities.filter((c) =>
             Search
           </button>
         </div>
+        
+
       </div>
 
       {/* Browse by Category */}
-      <section className="mt-20">
+      <section className="mt-20 ">
         <h2 className="text-center text-4xl font-bold">Browse by Category</h2>
         <p className="text-center mt-3">
           Find services posted by verified providers
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 px-10 mt-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 px-10 mt-12 mb-10">
           {/* Health */}
           <CategoryCard
             title="Health Care"
@@ -847,10 +850,7 @@ const filteredCities = availableCities.filter((c) =>
         </div>
       </section>
 
-      {/* Footer CTA */}
-      <div className="flex justify-center mt-20 mb-20">
-        <button className="btn btn-wide btn-primary">View All Services</button>
-      </div>
+      
     </main>
   );
 }
