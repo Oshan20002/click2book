@@ -32,7 +32,7 @@ export default function Navbar() {
             {/* Provider dashboard */}
             {profile?.role === "provider" && (
               <Link
-                href="/ProviderDashboard"
+                href="/ProviderDashbord"
                 className="btn btn-ghost btn-sm"
               >
                 Provider Dashboard

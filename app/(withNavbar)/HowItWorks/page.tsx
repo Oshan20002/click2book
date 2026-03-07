@@ -45,9 +45,8 @@ export default function HowItWorks() {
           <br />
           <div>
             <ul className="ml-5 list-disc">
-              <li className="pt-2">Browse 8+ service categories</li>
+              <li className="pt-2">Browse 5+ service categories</li>
               <li className="pt-2">Search by location</li>
-              <li className="pt-2">Filter by price range and ratings</li>
               <li className="pt-2">View detailed service descriptions</li>
             </ul>
           </div>
@@ -255,7 +254,7 @@ export default function HowItWorks() {
           <div className="flex justify-center gap-6 mt-8">
             <button className="btn btn-primary w-48">Find a Service</button>
             <button className="btn btn-outline btn-primary w-48">
-              Primary
+              Home
             </button>
           </div>
         </div>
