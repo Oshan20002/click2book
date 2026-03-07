@@ -1,17 +1,5 @@
 "use client";
 
-// components/Navbar.tsx
-//
-// Uses useAuth() from AuthContext — never queries Supabase independently.
-//
-// Key behaviours:
-//  - loading=true  → renders nothing in the auth section (zero flicker)
-//  - loading=false, user exists → shows name + Logout
-//  - loading=false, no user → shows Login + Sign Up
-//
-// The `loading` guard is the fix for "navbar shows Login/SignUp briefly
-// after refresh even though the user is already logged in."
-
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 
