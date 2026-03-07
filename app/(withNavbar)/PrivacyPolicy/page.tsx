@@ -79,7 +79,7 @@ export default function PrivacyPolicy() {
                 </section>
 
                 <section className="mb-10">
-                    <h2 className="text-2xl font-semibold mb-4">9. Children's Privacy</h2>
+                    <h2 className="text-2xl font-semibold mb-4">9. Children Privacy</h2>
                     <p className="text-gray-700 leading-relaxed">
                         Click2Book services are not intended for individuals under the age of 13. We do not knowingly collect personal information from children.
                     </p>
@@ -88,7 +88,7 @@ export default function PrivacyPolicy() {
                 <section className="mb-10">
                     <h2 className="text-2xl font-semibold mb-4">10. Changes to This Privacy Policy</h2>
                     <p className="text-gray-700 leading-relaxed">
-                        We may update this Privacy Policy from time to time. We will notify users of any changes by posting the new policy on this page and updating the "Last updated" date at the top.
+                        We may update this Privacy Policy from time to time. We will notify users of any changes by posting the new policy on this page and updating the Last updated date at the top.
                     </p>
 
                 </section>
