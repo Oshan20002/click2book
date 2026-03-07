@@ -16,6 +16,7 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import { useRouter } from "next/navigation";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -124,8 +125,8 @@ function StarRating({ value }: { value: number }) {
             value >= i
               ? "text-yellow-400"
               : value >= i - 0.5
-              ? "text-yellow-300"
-              : "text-gray-300"
+                ? "text-yellow-300"
+                : "text-gray-300"
           }`}
         >
           ★
@@ -138,6 +139,7 @@ function StarRating({ value }: { value: number }) {
 /* ================= COMPONENT ================= */
 
 export default function AdsPage({ searchParams }: Props) {
+  const router = useRouter();
   const category = searchParams.category ?? "";
   const district = searchParams.district ?? "";
   const city = searchParams.city ?? "";
@@ -159,9 +161,37 @@ export default function AdsPage({ searchParams }: Props) {
 
   // VIEW ALL RATINGS
   const [selectedServiceId, setSelectedServiceId] = useState<string | null>(
-    null
+    null,
   );
   const [showRatingsModal, setShowRatingsModal] = useState(false);
+
+  /*  SESSION CHECK */
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data } = await supabase.auth.getSession();
+
+      if (!data.session) {
+        router.push("/Login");
+      }
+    };
+
+    // check session on page load
+    checkSession();
+
+    // listen for session changes
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (!session) {
+          router.push("/Login");
+        }
+      },
+    );
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
 
   /* ================= FETCH ADS ================= */
 
@@ -178,7 +208,7 @@ export default function AdsPage({ searchParams }: Props) {
         city,
         map_url
       )
-    `
+    `,
       )
       .lte("ad_start_time", now)
       .gte("ad_end_time", now);
@@ -246,7 +276,7 @@ export default function AdsPage({ searchParams }: Props) {
               count: rating.count,
             },
           };
-        })
+        }),
       );
     };
 
@@ -350,7 +380,7 @@ export default function AdsPage({ searchParams }: Props) {
         break_start,
         break_end
       )
-    `
+    `,
       )
       .eq("ad_id", selectedAd.id)
       .eq("slot_date", selectedDate)
@@ -387,7 +417,7 @@ export default function AdsPage({ searchParams }: Props) {
 
         let currentMinutes = timeToMinutes(
           data.slot_start_time,
-          data.start_period
+          data.start_period,
         );
 
         let createdSlots = 0;
@@ -404,7 +434,7 @@ export default function AdsPage({ searchParams }: Props) {
             if (activeBreak) {
               currentMinutes = timeToMinutes(
                 activeBreak.break_end,
-                data.start_period
+                data.start_period,
               );
             }
             continue;
@@ -446,7 +476,7 @@ export default function AdsPage({ searchParams }: Props) {
         const validDays = data
           .map((d) => d.slot_date)
           .filter((date) =>
-            dayjs(date).tz("Asia/Colombo").isSameOrAfter(today)
+            dayjs(date).tz("Asia/Colombo").isSameOrAfter(today),
           );
 
         setAvailableDays(validDays);
@@ -460,7 +490,7 @@ export default function AdsPage({ searchParams }: Props) {
     setSelectedExtras((prev) =>
       prev.some((s) => s.service_name === service.service_name)
         ? prev.filter((s) => s.service_name !== service.service_name)
-        : [...prev, service]
+        : [...prev, service],
     );
   };
 
@@ -629,7 +659,7 @@ export default function AdsPage({ searchParams }: Props) {
                 <input
                   type="checkbox"
                   checked={selectedExtras.some(
-                    (e) => e.service_name === s.service_name
+                    (e) => e.service_name === s.service_name,
                   )}
                   onChange={() => toggleExtra(s)}
                 />
@@ -664,7 +694,7 @@ export default function AdsPage({ searchParams }: Props) {
 
                 const slotDateTime = dayjs(
                   `${selectedDate} ${s.start}`,
-                  "YYYY-MM-DD hh:mm A"
+                  "YYYY-MM-DD hh:mm A",
                 ).tz("Asia/Colombo");
 
                 const isPastSlot =
@@ -681,8 +711,8 @@ export default function AdsPage({ searchParams }: Props) {
                       isBooked
                         ? "btn-disabled bg-gray-300 text-gray-500"
                         : selectedSlot === s
-                        ? "btn-primary"
-                        : "btn-outline"
+                          ? "btn-primary"
+                          : "btn-outline"
                     }`}
                     onClick={() => !isBooked && setSelectedSlot(s)}
                   >

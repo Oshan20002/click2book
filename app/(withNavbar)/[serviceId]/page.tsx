@@ -80,6 +80,31 @@ export default function ServiceDetails() {
   const [ads, setAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(true);
 
+  /* SESSION CHECK */
+  useEffect(() => {
+    const getSession = async () => {
+      const { data } = await supabase.auth.getSession();
+
+      if (!data.session) {
+        router.push("/Login");
+      }
+    };
+
+    getSession();
+
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (!session) {
+          router.push("/Login");
+        }
+      },
+    );
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
   const [showAdd, setShowAdd] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
@@ -198,6 +223,21 @@ export default function ServiceDetails() {
       .single();
 
     if (ad) {
+      /* ================= SAVE EXTRA SERVICES ================= */
+      if (moreServices.length > 0) {
+        await supabase.from("ad_services").insert(
+          moreServices
+            .filter((s) => s.service_name)
+            .map((s) => ({
+              ad_id: ad.id,
+              service_name: s.service_name,
+              price: Number(s.price),
+              duration: Number(s.duration),
+            })),
+        );
+      }
+
+      /* ================= SAVE SLOT SCHEDULES ================= */
       for (const slot of slotSchedules) {
         const { data: slotRow } = await supabase
           .from("ad_slot_schedules")
@@ -220,7 +260,7 @@ export default function ServiceDetails() {
                 slot_schedule_id: slotRow.id,
                 break_start: b.start,
                 break_end: b.end,
-              }))
+              })),
           );
         }
       }
@@ -272,7 +312,7 @@ export default function ServiceDetails() {
             service_name: s.service_name,
             price: Number(s.price),
             duration: Number(s.duration),
-          }))
+          })),
       );
     }
 
@@ -305,7 +345,7 @@ export default function ServiceDetails() {
               slot_schedule_id: slotRow.id,
               break_start: b.start,
               break_end: b.end,
-            }))
+            })),
         );
       }
     }
@@ -419,36 +459,66 @@ export default function ServiceDetails() {
                       price: ad.price.toString(),
                     });
 
-                    // ✅ LOAD EXISTING SERVICES
-                    const { data } = await supabase
+                    /* ================= LOAD EXTRA SERVICES ================= */
+                    const { data: services } = await supabase
                       .from("ad_services")
                       .select("service_name, price, duration")
                       .eq("ad_id", ad.id);
 
                     setMoreServices(
-                      data && data.length > 0
-                        ? data.map((s) => ({
+                      services && services.length > 0
+                        ? services.map((s) => ({
                             service_name: s.service_name,
                             price: s.price.toString(),
                             duration: s.duration.toString(),
                           }))
-                        : [{ service_name: "", price: "", duration: "" }]
+                        : [{ service_name: "", price: "", duration: "" }],
                     );
 
-                    // LOAD BREAK TIMES
-                    const { data: breaks } = await supabase
-                      .from("ad_break_times")
-                      .select("break_start, break_end")
+                    /* ================= LOAD SLOT SCHEDULES ================= */
+                    const { data: schedules } = await supabase
+                      .from("ad_slot_schedules")
+                      .select("*")
                       .eq("ad_id", ad.id);
 
-                    setBreakTimes(
-                      breaks && breaks.length > 0
-                        ? breaks.map((b) => ({
-                            start: b.break_start,
-                            end: b.break_end,
-                          }))
-                        : [{ start: "", end: "" }]
-                    );
+                    if (schedules && schedules.length > 0) {
+                      const schedulesWithBreaks = await Promise.all(
+                        schedules.map(async (schedule) => {
+                          const { data: breaks } = await supabase
+                            .from("ad_slot_break_times")
+                            .select("break_start, break_end")
+                            .eq("slot_schedule_id", schedule.id);
+
+                          return {
+                            date: schedule.slot_date,
+                            start_time: schedule.slot_start_time,
+                            start_period: schedule.start_period || "AM",
+                            number_of_slots: schedule.number_of_slots,
+                            slot_duration: schedule.slot_duration,
+                            breakTimes:
+                              breaks && breaks.length > 0
+                                ? breaks.map((b) => ({
+                                    start: b.break_start,
+                                    end: b.break_end,
+                                  }))
+                                : [{ start: "", end: "" }],
+                          };
+                        }),
+                      );
+
+                      setSlotSchedules(schedulesWithBreaks);
+                    } else {
+                      setSlotSchedules([
+                        {
+                          date: "",
+                          start_time: "",
+                          start_period: "AM",
+                          number_of_slots: 1,
+                          slot_duration: 0,
+                          breakTimes: [{ start: "", end: "" }],
+                        },
+                      ]);
+                    }
 
                     setShowEdit(true);
                   }}
