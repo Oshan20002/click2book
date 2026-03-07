@@ -35,7 +35,9 @@ export default function Navbar() {
                 href="/ProviderDashbord"
                 className="btn btn-ghost btn-sm"
               >
-                Provider Dashboard
+                Provider Dashboard    
+
+                
               </Link>
             )}
 
