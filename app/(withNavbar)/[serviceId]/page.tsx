@@ -648,249 +648,304 @@ function Modal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded w-[450px] max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">{title}</h2>
+    <div className="fixed inset-0 bg-black/60 flex justify-center items-center z-50 p-4">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="p-6 border-b flex justify-between items-center bg-gray-50">
+          <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors text-2xl">×</button>
+        </div>
 
-        <label>Title</label>
-        <input
-          className="input w-full mb-2"
-          placeholder="Title"
-          value={form.title}
-          onChange={(e) => setForm({ ...form, title: e.target.value })}
-        />
-
-        <label>Category</label>
-        <input className="input w-full mb-2" value={category} disabled />
-
-        <label>Description</label>
-        <textarea
-          className="textarea w-full mb-2"
-          placeholder="Description"
-          value={form.description}
-          onChange={(e) => setForm({ ...form, description: e.target.value })}
-        />
-
-        <label>Ad Banner</label>
-        <input
-          type="file"
-          className="mb-2"
-          onChange={(e) => setBannerFile(e.target.files?.[0] || null)}
-        />
-
-        <label>AD Start Time</label>
-        <input
-          type="datetime-local"
-          className="input w-full mb-2"
-          value={form.ad_start_time}
-          onChange={(e) => setForm({ ...form, ad_start_time: e.target.value })}
-        />
-
-        <label>AD End Time</label>
-        <input
-          type="datetime-local"
-          className="input w-full mb-2"
-          value={form.ad_end_time}
-          onChange={(e) => setForm({ ...form, ad_end_time: e.target.value })}
-        />
-
-        <h3 className="font-semibold mt-4 mb-2">Slot Schedules</h3>
-
-        {slotSchedules.map((slot, index) => (
-          <div key={index} className="border rounded p-3 mb-4">
-            {/* Slot Date */}
-            <label>Slot Date</label>
-            <input
-              type="date"
-              className="input w-full mb-2"
-              value={slot.date}
-              onChange={(e) => {
-                const copy = [...slotSchedules];
-                copy[index].date = e.target.value;
-                setSlotSchedules(copy);
-              }}
-            />
-
-            {/* Slot Start Time */}
-            <label>Slot Start time</label>
-            <div className="flex gap-2 mb-2">
-              <input
-                type="time"
-                className="input w-full"
-                value={slot.start_time}
-                onChange={(e) => {
-                  const copy = [...slotSchedules];
-                  copy[index].start_time = e.target.value;
-                  setSlotSchedules(copy);
-                }}
-              />
-            </div>
-
-            {/* Number of Slots */}
-            <label>Number of Slots</label>
-            <input
-              type="number"
-              className="input w-full mb-2"
-              placeholder="Number of Slots"
-              value={slot.number_of_slots}
-              onChange={(e) => {
-                const copy = [...slotSchedules];
-                copy[index].number_of_slots = Number(e.target.value);
-                setSlotSchedules(copy);
-              }}
-            />
-
-            {/* Slot Duration */}
-            <label>Slot Duration (minutes)</label>
-            <input
-              type="number"
-              className="input w-full mb-2"
-              placeholder="Slot Duration (minutes)"
-              value={slot.slot_duration}
-              onChange={(e) => {
-                const copy = [...slotSchedules];
-                copy[index].slot_duration = Number(e.target.value);
-                setSlotSchedules(copy);
-              }}
-            />
-
-            {/* Break Times */}
-            <label className="font-semibold">Break Times</label>
-
-            {slot.breakTimes.map((b, bIndex) => (
-              <div key={bIndex} className="flex gap-2 mb-2">
+        <div className="p-6 overflow-y-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Left Column: General Info */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-blue-600">General Information</h3>
+              
+              <div>
+                <label className="text-sm font-medium">Title</label>
                 <input
-                  type="time"
-                  className="input w-full"
-                  value={b.start}
-                  onChange={(e) => {
-                    const copy = [...slotSchedules];
-                    copy[index].breakTimes[bIndex].start = e.target.value;
-                    setSlotSchedules(copy);
-                  }}
-                />
-                <input
-                  type="time"
-                  className="input w-full"
-                  value={b.end}
-                  onChange={(e) => {
-                    const copy = [...slotSchedules];
-                    copy[index].breakTimes[bIndex].end = e.target.value;
-                    setSlotSchedules(copy);
-                  }}
+                  className="input input-bordered w-full mt-1"
+                  placeholder="Title"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
                 />
               </div>
-            ))}
 
-            <button
-              className="btn btn-outline btn-sm w-full"
-              onClick={() => {
-                const copy = [...slotSchedules];
-                copy[index].breakTimes.push({ start: "", end: "" });
-                setSlotSchedules(copy);
-              }}
-            >
-              + Add Break Time
-            </button>
+              <div>
+                <label className="text-sm font-medium">Category</label>
+                <input className="input input-bordered w-full mt-1 bg-gray-100" value={category} disabled />
+              </div>
 
-            {calculateSlotEndTime(slot) && (
-              <p className="text-sm text-gray-600 mt-2">
-                Slot End Time:
-                <span className="font-semibold ml-1">
-                  {calculateSlotEndTime(slot)}
-                </span>
-              </p>
-            )}
+              <div>
+                <label className="text-sm font-medium">Description</label>
+                <textarea
+                  className="textarea textarea-bordered w-full mt-1 h-24"
+                  placeholder="Description"
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">Ad Banner</label>
+                <input
+                  type="file"
+                  className="file-input file-input-bordered w-full mt-1"
+                  onChange={(e) => setBannerFile(e.target.files?.[0] || null)}
+                />
+              </div>
+            </div>
+
+            {/* Right Column: Pricing & Timing */}
+            <div className="space-y-4">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-blue-600">Pricing & Schedule</h3>
+              
+              <div>
+                <label className="text-sm font-medium">Price (Rs)</label>
+                <input
+                  type="number"
+                  className="input input-bordered w-full mt-1"
+                  value={form.price}
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">AD Start Time</label>
+                <input
+                  type="datetime-local"
+                  className="input input-bordered w-full mt-1"
+                  value={form.ad_start_time}
+                  onChange={(e) => setForm({ ...form, ad_start_time: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">AD End Time</label>
+                <input
+                  type="datetime-local"
+                  className="input input-bordered w-full mt-1"
+                  value={form.ad_end_time}
+                  onChange={(e) => setForm({ ...form, ad_end_time: e.target.value })}
+                />
+              </div>
+            </div>
           </div>
-        ))}
 
-        {/* ➕ ADD ANOTHER DAY */}
-        <button
-          className="btn btn-primary w-full"
-          onClick={() =>
-            setSlotSchedules([
-              ...slotSchedules,
-              {
-                date: "",
-                start_time: "",
-                start_period: "AM",
-                number_of_slots: 1,
-                slot_duration: 0,
-                breakTimes: [{ start: "", end: "" }],
-              },
-            ])
-          }
-        >
-          + Add Slot for Another Day
-        </button>
+          <hr className="my-8" />
 
-        <label>Price (Rs)</label>
-        <input
-          type="number"
-          className="input w-full mb-4"
-          value={form.price}
-          onChange={(e) => setForm({ ...form, price: e.target.value })}
-        />
+          {/* Slot Schedules Section */}
+          <section>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">Slot Schedules</h3>
+              <button
+                className="btn btn-sm btn-outline btn-primary"
+                onClick={() =>
+                  setSlotSchedules([
+                    ...slotSchedules,
+                    {
+                      date: "",
+                      start_time: "",
+                      start_period: "AM",
+                      number_of_slots: 1,
+                      slot_duration: 0,
+                      breakTimes: [{ start: "", end: "" }],
+                    },
+                  ])
+                }
+              >
+                + Add Day
+              </button>
+            </div>
 
-        <hr className="my-4" />
-        <h3 className="font-semibold mb-2">More Services</h3>
+            <div className="space-y-4">
+              {slotSchedules.map((slot, index) => (
+                <div key={index} className="bg-blue-50/30 p-4 rounded-lg border border-blue-100 space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-bold uppercase text-blue-700">Slot Date</label>
+                      <input
+                        type="date"
+                        className="input input-bordered input-sm w-full mt-1"
+                        value={slot.date}
+                        onChange={(e) => {
+                          const copy = [...slotSchedules];
+                          copy[index].date = e.target.value;
+                          setSlotSchedules(copy);
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold uppercase text-blue-700">Start Time</label>
+                      <input
+                        type="time"
+                        className="input input-bordered input-sm w-full mt-1"
+                        value={slot.start_time}
+                        onChange={(e) => {
+                          const copy = [...slotSchedules];
+                          copy[index].start_time = e.target.value;
+                          setSlotSchedules(copy);
+                        }}
+                      />
+                    </div>
+                  </div>
 
-        {moreServices.map((s, index) => (
-          <div key={index} className="grid grid-cols-3 gap-2 mb-2">
-            <input
-              className="input input-sm"
-              placeholder="Service Name"
-              value={s.service_name}
-              onChange={(e) => {
-                const copy = [...moreServices];
-                copy[index].service_name = e.target.value;
-                setMoreServices(copy);
-              }}
-            />
-            <input
-              type="number"
-              className="input input-sm"
-              placeholder="Price"
-              value={s.price}
-              onChange={(e) => {
-                const copy = [...moreServices];
-                copy[index].price = e.target.value;
-                setMoreServices(copy);
-              }}
-            />
-            <input
-              type="number"
-              className="input input-sm"
-              placeholder="Duration (min)"
-              value={s.duration}
-              onChange={(e) => {
-                const copy = [...moreServices];
-                copy[index].duration = e.target.value;
-                setMoreServices(copy);
-              }}
-            />
-          </div>
-        ))}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-bold uppercase text-blue-700">Number of Slots</label>
+                      <input
+                        type="number"
+                        className="input input-bordered input-sm w-full mt-1"
+                        value={slot.number_of_slots}
+                        onChange={(e) => {
+                          const copy = [...slotSchedules];
+                          copy[index].number_of_slots = Number(e.target.value);
+                          setSlotSchedules(copy);
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold uppercase text-blue-700">Duration (min)</label>
+                      <input
+                        type="number"
+                        className="input input-bordered input-sm w-full mt-1"
+                        value={slot.slot_duration}
+                        onChange={(e) => {
+                          const copy = [...slotSchedules];
+                          copy[index].slot_duration = Number(e.target.value);
+                          setSlotSchedules(copy);
+                        }}
+                      />
+                    </div>
+                  </div>
 
-        <button
-          className="btn btn-outline w-full mb-4"
-          onClick={() =>
-            setMoreServices([
-              ...moreServices,
-              { service_name: "", price: "", duration: "" },
-            ])
-          }
-        >
-          + Add More Services
-        </button>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase text-gray-500">Break Times</label>
+                    {slot.breakTimes.map((b, bIndex) => (
+                      <div key={bIndex} className="flex gap-2">
+                        <input
+                          type="time"
+                          className="input input-bordered input-xs w-full"
+                          value={b.start}
+                          onChange={(e) => {
+                            const copy = [...slotSchedules];
+                            copy[index].breakTimes[bIndex].start = e.target.value;
+                            setSlotSchedules(copy);
+                          }}
+                        />
+                        <input
+                          type="time"
+                          className="input input-bordered input-xs w-full"
+                          value={b.end}
+                          onChange={(e) => {
+                            const copy = [...slotSchedules];
+                            copy[index].breakTimes[bIndex].end = e.target.value;
+                            setSlotSchedules(copy);
+                          }}
+                        />
+                      </div>
+                    ))}
+                    <button
+                      className="text-xs text-blue-600 font-bold hover:underline"
+                      onClick={() => {
+                        const copy = [...slotSchedules];
+                        copy[index].breakTimes.push({ start: "", end: "" });
+                        setSlotSchedules(copy);
+                      }}
+                    >
+                      + Add Break Time
+                    </button>
+                  </div>
 
-        <div className="flex justify-end gap-4">
-          <button className="btn btn-ghost" onClick={onClose}>
-            Cancel
-          </button>
-          <button className="btn btn-primary" onClick={onSave}>
-            Save
-          </button>
+                  {calculateSlotEndTime(slot) && (
+                    <div className="text-sm bg-white p-2 rounded border border-blue-100 text-blue-800 inline-block">
+                      Slot End: <strong>{calculateSlotEndTime(slot)}</strong>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <hr className="my-8" />
+
+          {/* Add-on Services Section */}
+          <section>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-800">Add-on Services</h3>
+              <button
+                className="btn btn-sm btn-ghost text-primary"
+                onClick={() =>
+                  setMoreServices([
+                    ...moreServices,
+                    { service_name: "", price: "", duration: "" },
+                  ])
+                }
+              >
+                + Add More
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {moreServices.map((s, index) => (
+                <div key={index} className="grid grid-cols-12 gap-2 items-center bg-gray-50 p-2 rounded-md">
+                  <div className="col-span-5">
+                    <input
+                      className="input input-bordered input-sm w-full"
+                      placeholder="Service Name"
+                      value={s.service_name}
+                      onChange={(e) => {
+                        const copy = [...moreServices];
+                        copy[index].service_name = e.target.value;
+                        setMoreServices(copy);
+                      }}
+                    />
+                  </div>
+                  <div className="col-span-3">
+                    <input
+                      type="number"
+                      className="input input-bordered input-sm w-full"
+                      placeholder="Price"
+                      value={s.price}
+                      onChange={(e) => {
+                        const copy = [...moreServices];
+                        copy[index].price = e.target.value;
+                        setMoreServices(copy);
+                      }}
+                    />
+                  </div>
+                  <div className="col-span-3">
+                    <input
+                      type="number"
+                      className="input input-bordered input-sm w-full"
+                      placeholder="Min"
+                      value={s.duration}
+                      onChange={(e) => {
+                        const copy = [...moreServices];
+                        copy[index].duration = e.target.value;
+                        setMoreServices(copy);
+                      }}
+                    />
+                  </div>
+                  <div className="col-span-1 text-right">
+                    <button 
+                      className="text-error font-bold"
+                      onClick={() => setMoreServices(moreServices.filter((_, i) => i !== index))}
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        {/* Footer */}
+        <div className="p-4 border-t bg-gray-50 flex justify-end gap-3">
+          <button className="btn btn-ghost px-6" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary px-10" onClick={onSave}>Save</button>
         </div>
       </div>
     </div>
