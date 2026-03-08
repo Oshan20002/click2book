@@ -26,10 +26,10 @@ const Footer: React.FC = () => {
         </nav>
         <nav>
           <h6 className="footer-title">Company</h6>
-          <a className="link link-hover">About us</a>
-          <a className="link link-hover">Contact</a>
-          <a className="link link-hover">Jobs</a>
-          <a className="link link-hover">Press kit</a>
+          <Link href="/Aboutus" className="link link-hover">Aboutus</Link>
+          <Link href="/Contact" className="link link-hover">Contact</Link>
+          <Link href="/Jobs" className="link link-hover">Jobs</Link>
+          <Link href="/Presskit" className="link link-hover">Press kit</Link>
         </nav>
         <nav>
           <h6 className="footer-title">Legal</h6>
