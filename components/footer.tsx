@@ -33,7 +33,7 @@ const Footer: React.FC = () => {
         </nav>
         <nav>
           <h6 className="footer-title">Legal</h6>
-          <a className="link link-hover">Terms of use</a>
+          <Link href="/TermsOfUse" className="link link-hover">Terms of use</Link>
           <Link href="/PrivacyPolicy" className="link link-hover">Privacy policy</Link>
           <a className="link link-hover">Cookie policy</a>
         </nav>
