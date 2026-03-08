@@ -105,7 +105,7 @@ export default function Login() {
               />
               <label className="label">Remember me</label>
             </div>
-            <a href="/forgot-password" className="text-blue-500 underline text-sm">
+            <a href="/ForgotPassword" className="text-blue-500 underline text-sm">
               Forgot Password?
             </a>
           </div>
