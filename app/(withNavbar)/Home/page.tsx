@@ -833,11 +833,11 @@ const filteredCities = availableCities.filter((c) =>
             image="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/Images/homeservice.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZXMvaG9tZXNlcnZpY2UuanBnIiwiaWF0IjoxNzYxMjkwOTYyLCJleHAiOjE3OTI4MjY5NjJ9.xwPueH2UnVuiBYPiTW9Evy0yB26Rx-ZYInwHmeKEaUg"
             onClick={() => browseCategory("Home Services")}
           />
-          {/* Automotive */}
+          {/* pet and animal */}
           <CategoryCard
             title="Pet & Animals"
             description="cat care, dog care, grooming, training, walking, pet sitting, boarding, daycare, veterinary services, pet training, "
-            image="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/Images/taxi.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZXMvdGF4aS5qcGciLCJpYXQiOjE3NjEyOTExMjMsImV4cCI6MTc5MjgyNzEyM30.Dr3Rn9E1BShrymodkCEz5sdQd29IphOwfIheG_LQN7g"
+            image="https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/Images/Pet%20and%20Animals.avif?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZXMvUGV0IGFuZCBBbmltYWxzLmF2aWYiLCJpYXQiOjE3NzMwMDE3NzQsImV4cCI6MTgwNDUzNzc3NH0.4zguJbdr_yTY6Mpe8TOYGBsvOMuZB0mObaDWowNeiWU"
             onClick={() => browseCategory("Automotive")}
           />
           {/* Technology */}
