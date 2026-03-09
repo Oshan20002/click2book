@@ -1,9 +1,5 @@
 "use client";
-
-// app/ProviderDashbord/page.tsx
-//
-// Uses useAuth() — no independent session or profile queries.
-// hasRole("provider") from context handles both string and array role types.
+// This page runs on the client side
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -11,6 +7,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 
+// Default images for service categories
 const categoryImages: Record<string, string> = {
   "Health & Medical": "https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/Images/helthcare.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZXMvaGVsdGhjYXJlLmpwZyIsImlhdCI6MTc2MTI4OTc2MywiZXhwIjoxODQ3Njg5NzYzfQ.WwdqaHdjiC14uHeq8Lex7EZ_9NHOr6KnPq7nNLarxq4",
   "Education & Tutoring": "https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/Images/education.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZXMvZWR1Y2F0aW9uLmpwZyIsImlhdCI6MTc2MTI5MDEzMSwiZXhwIjoxNzkyODI2MTMxfQ.4868g02rfwRGp9oh-pJz1iBS2LwCsd4Fyv-d5dCECLY",
@@ -19,22 +16,30 @@ const categoryImages: Record<string, string> = {
   "Technology & IT": "https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/Images/tech.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZXMvdGVjaC5qcGciLCJpYXQiOjE3NjEyOTEyMTUsImV4cCI6MTc5MjgyNzIxNX0.D43Vo0-iFmL4SUS3rT1HQ4alKsLDBPkyYg1kzPbdkYI",
 };
 
+// Main component for provider dashboard
 export default function ProviderDashboard() {
   const router = useRouter();
+
+  // Auth context: user session, profile info, loading state, role checker
   const { user, profile, loading, hasRole } = useAuth();
 
+  // Local state for services, loading, and errors
   const [services, setServices] = useState<any[]>([]);
   const [servicesLoading, setServicesLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Auth guard: wait for context to resolve, then check role.
+  // Auth Guard: redirect non-providers or unauthenticated users
   useEffect(() => {
     if (loading) return; // context still initialising
+
+    // redirect to login if no user
     if (!user) { router.push("/Login"); return; }
+
+    // redirect to home if not a provider
     if (!hasRole("provider")) { router.push("/"); return; }
   }, [user, loading, hasRole, router]);
 
-  // Fetch services only once we know the user is a valid provider.
+  // Fetch services for the provider
   useEffect(() => {
     if (!user || !hasRole("provider")) return;
 
@@ -63,7 +68,7 @@ export default function ProviderDashboard() {
     );
   }
 
-  // If we somehow land here without a profile, bail.
+  // If profile not loaded, render nothing
   if (!profile) return null;
 
   return (

@@ -1,14 +1,12 @@
 "use client";
 
-// app/RegisterService/page.tsx
-//
-// Uses useAuth() for the auth guard and user ID — no independent queries.
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 import { useAuth } from "@/context/AuthContext";
 
+
+// Districts & Cities for selection
 const DISTRICTS = [
   "Colombo", "Gampaha", "Kalutara", "Kandy", "Matale", "Nuwara Eliya",
   "Galle", "Matara", "Hambantota", "Jaffna", "Kilinochchi", "Mannar",
@@ -38,29 +36,44 @@ const CITIES = [
   "Udugama","Valaichchenai","Vavuniya","Wadduwa","Wattala","Weligama","Welimada","Wennappuwa",
 ];
 
+
+// Main component for service registration page
 export default function RegisterService() {
   const router = useRouter();
   const { user, loading, hasRole } = useAuth();
 
+  // Submission loading
   const [submitting, setSubmitting] = useState(false);
+  // Error messages
   const [error, setError] = useState("");
+
+  // Form state for service details
   const [form, setForm] = useState({
     service_name: "", description: "", category: "", district: "", city: "", map_url: "",
   });
+
+  // Input for city search
   const [cityQuery, setCityQuery] = useState("");
 
-  // Auth guard — wait for context to resolve
+  // Auth guard
   useEffect(() => {
     if (loading) return;
+
+    //redirect non-providers or unauthenticated users
     if (!user) { router.push("/Login"); return; }
+    
+    // redirect to home if not a provider
     if (!hasRole("provider")) { router.push("/"); return; }
   }, [user, loading, hasRole, router]);
 
+
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     if (!user) return;
 
+    // Intert new service into database
     try {
       setSubmitting(true);
       const { error: insertError } = await supabase.from("services").insert({
@@ -74,7 +87,7 @@ export default function RegisterService() {
       });
 
       if (insertError) { setError(insertError.message); return; }
-      router.push("/ProviderDashbord");
+      router.push("/ProviderDashbord"); // Redirect after success
     } catch {
       setError("Something went wrong. Please try again.");
     } finally {
@@ -82,6 +95,7 @@ export default function RegisterService() {
     }
   };
 
+  // Show loading spinner while auth context is initializing
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">

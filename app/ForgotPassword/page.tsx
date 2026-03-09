@@ -14,7 +14,7 @@ export default function ForgotPassword() {
 
   // Success message
   const [message, setMessage] = useState("");
-
+  
   // Error message
   const [error, setError] = useState("");
 

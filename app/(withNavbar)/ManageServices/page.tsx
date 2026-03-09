@@ -1,16 +1,21 @@
 "use client";
 
+// IMPORTS 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabaseClient";
 
+// MAIN COMPONENT 
 export default function ManageServices() {
   const router = useRouter();
 
+  // State variables
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [services, setServices] = useState<any[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  // Form state for editing services
   const [editForm, setEditForm] = useState<any>({
     service_name: "",
     category: "",
@@ -19,11 +24,12 @@ export default function ManageServices() {
     map_url: "",
   });
 
-  // 🔐 Auth + Provider check + Fetch services
+  //  Auth + Provider check + Fetch services
   useEffect(() => {
     const init = async () => {
       const { data } = await supabase.auth.getUser();
 
+      // Redirect to login if not authenticated
       if (!data.user) {
         router.push("/Login");
         return;
@@ -31,17 +37,20 @@ export default function ManageServices() {
 
       setUser(data.user);
 
+      // Check if user is a provider
       const { data: profile } = await supabase
         .from("users")
         .select("role")
         .eq("id", data.user.id)
         .single();
 
+        // Redirect to home if not a provider
       if (!profile || profile.role !== "provider") {
         router.push("/");
         return;
       }
 
+      // Fetch services for the provider
       const { data: servicesData } = await supabase
         .from("services")
         .select("*")
@@ -55,7 +64,7 @@ export default function ManageServices() {
     init();
   }, [router]);
 
-  // 📝 Start Edit
+  //  Start Edit 
   const startEdit = (service: any) => {
     setEditingId(service.id);
     setEditForm({
@@ -67,7 +76,7 @@ export default function ManageServices() {
     });
   };
 
-  // 💾 Save Edit
+  //  Save Edit 
   const saveEdit = async (id: string) => {
     const { error } = await supabase
       .from("services")
@@ -79,24 +88,29 @@ export default function ManageServices() {
         map_url: editForm.map_url,
       })
       .eq("id", id)
-      .eq("provider_id", user.id); // 🔒 RLS safe
+      .eq("provider_id", user.id); // Ensure provider can only edit their own services
 
+      // If error occurs, alert and do not update local state
     if (error) {
       alert(error.message);
       return;
     }
 
+    // Update local state with edited service
     setServices(services.map((s) => (s.id === id ? { ...s, ...editForm } : s)));
 
     setEditingId(null);
   };
 
-  // 🗑 Delete service
+  //  Delete service
   const deleteService = async (id: string) => {
+    // Confirm deletion
     if (!confirm("Are you sure you want to delete this service?")) return;
 
+    // Delete service from database
     const { error } = await supabase.from("services").delete().eq("id", id);
 
+    // If error occurs, alert and do not update local state
     if (error) {
       alert(error.message);
     } else {
@@ -104,6 +118,7 @@ export default function ManageServices() {
     }
   };
 
+  //  Loading state
   if (loading) return <p className="text-center mt-10">Loading...</p>;
 
   return (

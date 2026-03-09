@@ -1,8 +1,10 @@
 "use client";
+// This page runs on the client side
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+// Districts & Cities
 
 const DISTRICTS = [
   "Colombo",
@@ -147,9 +149,7 @@ const CITIES = [
   "Wennappuwa",
 ];
 
-/* =========================
-  DISTRICT → CITY MAP
-========================= */
+// District → City Mapping
 
 const DISTRICT_CITY_MAP: Record<string, string[]> = {
   Colombo: [
@@ -598,9 +598,7 @@ Kegalle: [
 };
 
 
-/* =========================
-  KEYWORDS
-========================= */
+// Keywords & Categories
 
 const KEYWORDS = [
   // 🏥 Health Care
@@ -649,12 +647,16 @@ const KEYWORDS = [
   { keyword: "Web development", category: "Technology" },
 ];
 
+ // Home Page Component
+
 export default function Home() {
   const router = useRouter();
 
+  // States
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
 
+  // Filter keywords for autocomplete
   const keywordSuggestions = KEYWORDS.filter((k) =>
     k.keyword.toLowerCase().includes(search.toLowerCase())
   ).slice(0, 8);
@@ -664,6 +666,7 @@ export default function Home() {
   const [citySearch, setCitySearch] = useState("");
   const [city, setCity] = useState("");
 
+  // Get cities based on district selection
   const availableCities = district
   ? DISTRICT_CITY_MAP[district] || []
   : CITIES;
@@ -673,6 +676,7 @@ const filteredCities = availableCities.filter((c) =>
 );
 
 
+// Handle search button
   const handleSearch = () => {
     const params = new URLSearchParams();
 
@@ -684,6 +688,7 @@ const filteredCities = availableCities.filter((c) =>
     router.push(`/ads?${params.toString()}`);
   };
 
+  // Browse by category
   const browseCategory = (category: string) => {
     router.push(`/ads?category=${encodeURIComponent(category)}`);
   };
