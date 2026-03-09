@@ -1,3 +1,4 @@
+
 import React from "react";
 
 export default function CookiePolicy() {
@@ -14,6 +15,7 @@ export default function CookiePolicy() {
           Last updated: March 2026
         </p>
 
+        
         <section className="mb-10">
           <h2 className="text-2xl font-semibold mb-4">1. What Are Cookies</h2>
           <p className="text-gray-700 leading-relaxed">
@@ -24,6 +26,7 @@ export default function CookiePolicy() {
           </p>
         </section>
 
+        
         <section className="mb-10">
           <h2 className="text-2xl font-semibold mb-4">
             2. How Click2Book Uses Cookies
@@ -41,27 +44,28 @@ export default function CookiePolicy() {
           </ul>
         </section>
 
+        
         <section className="mb-10">
           <h2 className="text-2xl font-semibold mb-4">3. Types of Cookies We Use</h2>
 
           <ul className="list-disc pl-6 space-y-2 text-gray-700">
             <li>
-              <strong>Essential Cookies</strong> – Required for the platform to
+              <strong>Essential Cookies</strong> Required for the platform to
               function properly.
             </li>
 
             <li>
-              <strong>Performance Cookies</strong> – Help us understand how
+              <strong>Performance Cookies</strong> Help us understand how
               users interact with the platform so we can improve services.
             </li>
 
             <li>
-              <strong>Functionality Cookies</strong> – Remember user
+              <strong>Functionality Cookies</strong> Remember user
               preferences such as login sessions or settings.
             </li>
 
             <li>
-              <strong>Analytics Cookies</strong> – Used to analyze platform
+              <strong>Analytics Cookies</strong> Used to analyze platform
               usage and improve performance.
             </li>
           </ul>
@@ -113,7 +117,6 @@ export default function CookiePolicy() {
           <p className="text-gray-700">
             If you have questions about our Cookie Policy, please contact us:
           </p>
-
         </section>
 
       </div>
