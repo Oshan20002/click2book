@@ -7,11 +7,11 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 
+// Day js for handling timezones and date formatting
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-/* ================= CATEGORY IMAGES ================= */
-/* Category → Image Mapping */
+//CATEGORY IMAGES
 const categoryImages: Record<string, string> = {
   "Health & Medical":
     "https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/Images/helthcare.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZXMvaGVsdGhjYXJlLmpwZyIsImlhdCI6MTc2MTI4OTc2MywiZXhwIjoxODQ3Njg5NzYzfQ.WwdqaHdjiC14uHeq8Lex7EZ_9NHOr6KnPq7nNLarxq4",
@@ -28,7 +28,10 @@ const categoryImages: Record<string, string> = {
   "Technology & IT":
     "https://krxkuasaiqaulxfbqnad.supabase.co/storage/v1/object/sign/Images/tech.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV80NThmNGRmMi1iOGI3LTQ4ZWItOTU2YS01MGU2YmFhYTg2MGUiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJJbWFnZXMvdGVjaC5qcGciLCJpYXQiOjE3NjEyOTEyMTUsImV4cCI6MTc5MjgyNzIxNX0.D43Vo0-iFmL4SUS3rT1HQ4alKsLDBPkyYg1kzPbdkYI",
 };
-/* ================= TYPES ================= */
+
+//TYPES
+// Define TypeScript interfaces for type safety
+
 interface Service {
   id: string;
   service_name: string;
@@ -71,7 +74,7 @@ interface SlotSchedule {
   breakTimes: SlotBreakTime[];
 }
 
-/* ================= MAIN COMPONENT ================= */
+// MAIN COMPONENT
 export default function ServiceDetails() {
   const { serviceId } = useParams();
   const router = useRouter();
@@ -80,11 +83,12 @@ export default function ServiceDetails() {
   const [ads, setAds] = useState<Ad[]>([]);
   const [loading, setLoading] = useState(true);
 
-  /* SESSION CHECK */
+// SESSION CHECK
   useEffect(() => {
     const getSession = async () => {
       const { data } = await supabase.auth.getSession();
 
+      // Redirect if not logged in
       if (!data.session) {
         router.push("/Login");
       }
@@ -92,6 +96,7 @@ export default function ServiceDetails() {
 
     getSession();
 
+    // Listen for auth changes (logout)
     const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         if (!session) {
@@ -110,6 +115,7 @@ export default function ServiceDetails() {
   const [selectedAd, setSelectedAd] = useState<Ad | null>(null);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
 
+  // Form state for ad details
   const [breakTimes, setBreakTimes] = useState<
     { start: string; end: string }[]
   >([{ start: "", end: "" }]);
@@ -122,7 +128,8 @@ export default function ServiceDetails() {
     price: "",
   });
 
-  /* ================= BREAK TIMES ================= */
+  //BREAK TIMES
+
   const [slotSchedules, setSlotSchedules] = useState<SlotSchedule[]>([
     {
       date: "",
@@ -134,17 +141,18 @@ export default function ServiceDetails() {
     },
   ]);
 
-  /* ================= MORE SERVICES ================= */
+  // MORE SERVICES
   const [moreServices, setMoreServices] = useState<
     { service_name: string; price: string; duration: string }[]
   >([{ service_name: "", price: "", duration: "" }]);
 
-  /* ================= FETCH DATA ================= */
+  // FETCH DATA
   const fetchData = async () => {
     setLoading(true);
     const { data: auth } = await supabase.auth.getUser();
     if (!auth.user) return router.push("/Login");
 
+    // Fetch service details
     const { data: serviceData } = await supabase
       .from("services")
       .select("*")
@@ -153,6 +161,7 @@ export default function ServiceDetails() {
 
     const nowUTC = dayjs().utc().toISOString();
 
+    // Fetch active ads for the service
     const { data: adsData } = await supabase
       .from("ads")
       .select("*")
@@ -166,35 +175,40 @@ export default function ServiceDetails() {
     setLoading(false);
   };
 
+  // Initial data fetch and refetch on serviceId change
   useEffect(() => {
     fetchData();
   }, [serviceId]);
 
-  /* ================= IMAGE UPLOAD ================= */
+  // IMAGE UPLOAD
   const uploadBanner = async () => {
     if (!bannerFile) return null;
 
+    // Generate unique file name and upload to Supabase Storage
     const fileName = `ad-${Date.now()}-${bannerFile.name}`;
     const { error } = await supabase.storage
       .from("ads-banners")
       .upload(fileName, bannerFile);
 
+      // Handle upload errors
     if (error) {
       alert(error.message);
       return null;
     }
 
+    // Get public URL of the uploaded image
     const { data } = supabase.storage
       .from("ads-banners")
       .getPublicUrl(fileName);
     return data.publicUrl;
   };
 
-  /* ================= CREATE ================= */
+  // CREATE FUNCTION for new ads
   const handleCreate = async () => {
     const banner_url = await uploadBanner();
     const user = (await supabase.auth.getUser()).data.user;
 
+    // Insert new ad into database
     const { data: ad, error } = await supabase
       .from("ads")
       .insert({
@@ -223,7 +237,7 @@ export default function ServiceDetails() {
       .single();
 
     if (ad) {
-      /* ================= SAVE EXTRA SERVICES ================= */
+      // SAVE EXTRA SERVICES
       if (moreServices.length > 0) {
         await supabase.from("ad_services").insert(
           moreServices
@@ -237,7 +251,7 @@ export default function ServiceDetails() {
         );
       }
 
-      /* ================= SAVE SLOT SCHEDULES ================= */
+      // SAVE SLOT SCHEDULES
       for (const slot of slotSchedules) {
         const { data: slotRow } = await supabase
           .from("ad_slot_schedules")
@@ -252,6 +266,7 @@ export default function ServiceDetails() {
           .select()
           .single();
 
+          // SAVE BREAK TIMES for each slot
         if (slotRow) {
           await supabase.from("ad_slot_break_times").insert(
             slot.breakTimes
@@ -269,14 +284,16 @@ export default function ServiceDetails() {
     fetchData();
   };
 
-  /* ================= UPDATE ================= */
+  // UPDATE
   const handleUpdate = async () => {
     if (!selectedAd) return;
 
+    // If a new banner is selected, upload it. Otherwise, keep existing URL.
     const banner_url = bannerFile
       ? await uploadBanner()
       : selectedAd.banner_url;
 
+// Update ad details in database
     const { error } = await supabase
       .from("ads")
       .update({
@@ -337,6 +354,7 @@ export default function ServiceDetails() {
         .select()
         .single();
 
+        // SAVE BREAK TIMES for each slot
       if (slotRow) {
         await supabase.from("ad_slot_break_times").insert(
           slot.breakTimes
@@ -354,25 +372,28 @@ export default function ServiceDetails() {
     fetchData();
   };
 
-  /* ================= DELETE ================= */
+  // DELETE FUNCTION for ads
   const handleDelete = async (ad: Ad) => {
     if (!confirm("Delete this ad?")) return;
 
+    // If ad has a banner, delete it from storage
     if (ad.banner_url) {
       const path = ad.banner_url.split("/ads-banners/")[1];
       await supabase.storage.from("ads-banners").remove([path]);
     }
-
+// Delete ad and related data from database
     await supabase.from("ads").delete().eq("id", ad.id);
     fetchData();
   };
 
+  // Reset form and state after add/edit
   const reset = () => {
     setShowAdd(false);
     setShowEdit(false);
     setSelectedAd(null);
     setBannerFile(null);
 
+    // Reset form fields
     setForm({
       title: "",
       description: "",
@@ -381,6 +402,7 @@ export default function ServiceDetails() {
       price: "",
     });
 
+    // Reset break times and slot schedules
     setSlotSchedules([
       {
         date: "",
@@ -392,12 +414,13 @@ export default function ServiceDetails() {
       },
     ]);
 
+    // Reset extra services
     setMoreServices([{ service_name: "", price: "", duration: "" }]);
   };
 
+  // Show loading spinner while data is being fetched
   if (loading) return <p className="text-center mt-10">Loading...</p>;
 
-  /* ================= RENDER ================= */
   return (
     <div className="max-w-6xl mx-auto p-6">
       <img
@@ -590,9 +613,9 @@ function Modal({
   slotSchedules,
   setSlotSchedules,
 }: ModalProps) {
-  // ==============================
-  // 1️⃣ TIME → MINUTES
-  // ==============================
+
+  // 1️ TIME → MINUTES
+
   const timeToMinutes = (time: string, period: string) => {
     if (!time) return 0;
 
@@ -605,9 +628,9 @@ function Modal({
     return hours * 60 + m;
   };
 
-  // ==============================
-  // 3️⃣ SLOT END CALCULATION (CORRECT)
-  // ==============================
+
+  // 3 SLOT END CALCULATION (CORRECT)
+
   const calculateSlotEndTime = (slot: any) => {
     if (!slot.start_time || !slot.slot_duration || !slot.number_of_slots) {
       return "";
@@ -626,13 +649,13 @@ function Modal({
         return currentTime >= start && currentTime < end;
       });
 
-      // ⏭ Skip break
+      //  Skip break
       if (activeBreak) {
         currentTime = timeToMinutes(activeBreak.end, slot.start_period);
         continue;
       }
 
-      // ✅ Create slot
+      //  Create slot
       currentTime += slot.slot_duration;
       createdSlots++;
     }
