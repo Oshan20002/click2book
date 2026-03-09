@@ -1,35 +1,48 @@
 "use client";
+// This page runs on the client side
 
 import React, { useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
 export default function ForgotPassword() {
 
+  // Store email input
   const [email, setEmail] = useState("");
+
+  // Loading state while sending reset email
   const [loading, setLoading] = useState(false);
+
+  // Success message
   const [message, setMessage] = useState("");
+
+  // Error message
   const [error, setError] = useState("");
 
+  // Function to send password reset email
   const handleReset = async () => {
-    setError("");
-    setMessage("");
+    setError(""); // clear previous error
+    setMessage(""); // clear previous message
 
+    // Check if email is empty
     if (!email) {
       setError("Please enter your email.");
       return;
     }
 
-    setLoading(true);
+    setLoading(true);   // show loading spinner
 
+    // Send reset password email via Supabase
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/ResetPassword`,
     });
 
     setLoading(false);
 
+    // If error occurs
     if (error) {
       setError(error.message);
     } else {
+      // Success message
       setMessage("Password reset link sent. Please check your email.");
     }
   };

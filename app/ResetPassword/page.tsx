@@ -1,24 +1,40 @@
 "use client";
+// This page runs on the client side
 
 import React, { useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
-import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabaseClient";  // Supabase authentication client
+import { useRouter } from "next/navigation";  // Router for redirecting pages
 
+
+// Reset Password page component
 export default function ResetPassword() {
 
   const router = useRouter();
 
+  // Store new password
   const [password, setPassword] = useState("");
+
+  // Store confirm password
   const [confirm, setConfirm] = useState("");
+
+  // Loading state for update button
   const [loading, setLoading] = useState(false);
+
+  // Error message
   const [error, setError] = useState("");
+
+  // Success message
   const [message, setMessage] = useState("");
 
+
+  // Function to update password
   const handleUpdate = async () => {
 
-    setError("");
-    setMessage("");
+    setError("");  // clear previous errors
+    setMessage("");  // clear previous messages
 
+     
+    // Validate inputs
     if (!password || !confirm) {
       setError("Please fill both fields.");
       return;
@@ -36,10 +52,12 @@ export default function ResetPassword() {
 
     setLoading(true);
 
+    // Update user password in Supabase
     const { error } = await supabase.auth.updateUser({
       password: password,
     });
 
+    // If error occurs
     if (error) {
       setError(error.message);
       setLoading(false);
@@ -53,6 +71,7 @@ export default function ResetPassword() {
 
     setLoading(false);
 
+    // Redirect to login page after 1.5 seconds
     setTimeout(() => {
       router.replace("/Login");
     }, 1500);

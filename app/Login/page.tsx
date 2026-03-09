@@ -1,10 +1,6 @@
 "use client";
+// This page runs on the client side
 
-// app/Login/page.tsx
-//
-// Uses useAuth() to read existing session from context (no independent query).
-// After signInWithPassword succeeds, onAuthStateChange in AuthContext fires
-// SIGNED_IN and updates the navbar automatically — no router.refresh() needed.
 
 import React, { useState, useEffect, ChangeEvent } from "react";
 import { supabase } from "@/lib/supabaseClient";
@@ -13,42 +9,48 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function Login() {
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const { user, loading } = useAuth(); // Get logged-in user and loading state
 
+  // Form data
   const [form, setForm] = useState({ email: "", password: "", remember: true });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  // Redirect if already logged in. Wait for loading=false first to avoid
-  // redirecting before the initial session check completes.
+
+  // If user already logged in redirect to homepage
   useEffect(() => {
     if (!loading && user) router.push("/");
   }, [user, loading, router]);
 
+  
+  // Handle input changes
   const handleChange = (e: ChangeEvent<HTMLInputElement>) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
+  // Login function 
   const handleLogin = async () => {
     setError("");
+    // Check if fields are empty
     if (!form.email || !form.password) {
       setError("Please enter your email and password.");
       return;
     }
 
     setSubmitting(true);
+
+    // Login with Supabase
     const { error: loginError } = await supabase.auth.signInWithPassword({
       email: form.email,
       password: form.password,
     });
     setSubmitting(false);
 
+    // If login failed
     if (loginError) {
       setError(loginError.message);
       return;
     }
-
-    // AuthContext's onAuthStateChange fires SIGNED_IN here automatically,
-    // updating the navbar without any router.refresh() race condition.
+    // If login successful, redirect to homepage
     router.push("/");
   };
 
@@ -119,17 +121,6 @@ export default function Login() {
               <span className="loading loading-spinner loading-sm" />
             ) : "Login"}
           </button>
-
-          <div className="divider">Or Login with</div>
-
-          <div className="flex gap-4 w-full">
-            <button className="btn bg-white text-black border w-1/2">
-              Login with Google
-            </button>
-            <button className="btn bg-[#1A77F2] text-white w-1/2">
-              Login with Facebook
-            </button>
-          </div>
 
           <p className="text-center mt-4">
             Don&apos;t have an account?{" "}
