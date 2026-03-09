@@ -49,7 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .from("users")
       .select("id, first_name, last_name, email, role")
       .eq("id", userId)
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error("[AuthContext] Failed to fetch profile:", error.message);
