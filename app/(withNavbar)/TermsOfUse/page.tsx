@@ -77,7 +77,7 @@ export default function TermsOfUse() {
 
                 <section className="mb-10">
                     <h2 className="text-2xl font-semibold mb-4">7. Limitation of Liability</h2>
-                    <p className="text-gray-700 leading-relaxed">Click2Book provides the platform "as is". We are not responsible
+                    <p className="text-gray-700 leading-relaxed">Click2Book provides the platform as is. We are not responsible
             for the quality, safety, or reliability of services provided by
             third-party service providers.
             <br /><br />
