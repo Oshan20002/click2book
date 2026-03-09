@@ -40,18 +40,22 @@ export default function ResetPassword() {
       password: password,
     });
 
-    setLoading(false);
-
     if (error) {
       setError(error.message);
+      setLoading(false);
       return;
     }
 
-    setMessage("Password updated successfully.");
+    setMessage("Password updated successfully. Redirecting to login...");
+
+    // logout user after password reset
+    await supabase.auth.signOut();
+
+    setLoading(false);
 
     setTimeout(() => {
-      router.push("/Login");
-    }, 2000);
+      router.replace("/Login");
+    }, 1500);
   };
 
   return (
@@ -62,6 +66,7 @@ export default function ResetPassword() {
       </h1>
 
       <div className="w-full max-w-md mx-auto mt-8 px-4">
+
         <fieldset className="fieldset bg-base-200 border-base-300 rounded-box border p-10">
 
           {error && (
@@ -77,6 +82,7 @@ export default function ResetPassword() {
           )}
 
           <label className="label">New Password</label>
+
           <input
             type="password"
             className="input w-full"
@@ -85,7 +91,8 @@ export default function ResetPassword() {
             onChange={(e) => setPassword(e.target.value)}
           />
 
-          <label className="label">Confirm Password</label>
+          <label className="label mt-3">Confirm Password</label>
+
           <input
             type="password"
             className="input w-full"
@@ -99,14 +106,17 @@ export default function ResetPassword() {
             onClick={handleUpdate}
             disabled={loading}
           >
+
             {loading ? (
               <span className="loading loading-spinner loading-sm"></span>
             ) : (
               "Update Password"
             )}
+
           </button>
 
         </fieldset>
+
       </div>
 
     </main>
