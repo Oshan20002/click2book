@@ -21,7 +21,7 @@ const Footer: React.FC = () => {
           <h6 className="footer-title">Services</h6>
           <Link href="/Branding" className="link link-hover">Branding</Link>
           <Link href="/Design" className="link link-hover">Design</Link>
-          <a className="link link-hover">Marketing</a>
+          <Link href="/Marketing" className="link link-hover">Marketing</Link>
           <a className="link link-hover">Advertisement</a>
         </nav>
         <nav>
