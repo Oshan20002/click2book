@@ -1,13 +1,19 @@
 "use client";
 
-import React, { useState } from "react";
+// app/SignUp/page.tsx
+//
+// Uses useAuth() to redirect already-logged-in users away.
+// On failed DB insert, signs out the orphaned auth user to prevent broken state.
+
+import React, { useState, ChangeEvent } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
-import { ChangeEvent } from "react";
-
+import { useAuth } from "@/context/AuthContext";
+import { useEffect } from "react";
 
 export default function SignUp() {
   const router = useRouter();
+  const { user, loading } = useAuth();
 
   const [form, setForm] = useState({
     role: "customer",
@@ -18,40 +24,40 @@ export default function SignUp() {
     confirmPassword: "",
     agree: true,
   });
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-  setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  // Redirect already-logged-in users
+  useEffect(() => {
+    if (!loading && user) router.push("/");
+  }, [user, loading, router]);
 
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSignUp = async () => {
-    if (!form.agree) {
-      alert("You must agree to Terms and Conditions");
-      return;
-    }
+    setError("");
 
-    if (form.password !== form.confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
+    if (!form.agree) { setError("You must agree to Terms and Conditions."); return; }
+    if (form.password !== form.confirmPassword) { setError("Passwords do not match."); return; }
+    if (!form.firstName || !form.lastName || !form.email || !form.password) { setError("Please fill in all required fields."); return; }
+    if (form.password.length < 6) { setError("Password must be at least 6 characters."); return; }
 
-    if (!form.firstName || !form.lastName || !form.email || !form.password) {
-      alert("Please fill in all required fields");
-      return;
-    }
+    setSubmitting(true);
 
-    // 1️⃣ Create auth user
-     const{ data, error } = await supabase.auth.signUp({
+    // Step 1: Create auth user
+    const { data, error: authError } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
     });
 
-    if (error) {
-      alert(error.message);
+    if (authError) {
+      setError(authError.message);
+      setSubmitting(false);
       return;
     }
 
-    // 2️⃣ Insert user profile
+    // Step 2: Insert user profile
     const { error: profileError } = await supabase.from("users").insert({
       id: data?.user?.id,
       first_name: form.firstName,
@@ -61,154 +67,103 @@ export default function SignUp() {
     });
 
     if (profileError) {
-      alert(profileError.message);
+      // Roll back the auth user to prevent an orphaned account
+      // that would break every future login attempt.
+      await supabase.auth.signOut();
+      setError("Account setup failed: " + profileError.message + ". Please try again.");
+      setSubmitting(false);
       return;
     }
 
-    alert("Account created successfully!");
+    setSubmitting(false);
     router.push("/Login");
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <span className="loading loading-spinner loading-lg" />
+      </div>
+    );
+  }
+
   return (
     <main>
-      <h1 className="text-center mt-10 font-bold text-5xl ml-24">
-        Click2Book
-      </h1>
-      <h2 className="text-center mt-5 font-bold text-2xl ml-24">
-        SignUp
-      </h2>
+      <h1 className="text-center mt-10 font-bold text-5xl">Click2Book</h1>
+      <h2 className="text-center mt-5 font-bold text-2xl">Sign Up</h2>
 
-      <div className="w-1/3 mx-auto mt-5 ">
+      <div className="w-full max-w-md mx-auto mt-5 px-4">
         <fieldset className="fieldset bg-base-200 border-base-300 rounded-box border p-10">
-          <label className="label text-xl">I want to join as a</label>
 
-          {/* ROLE BUTTONS */}
+          {error && (
+            <div className="alert alert-error mb-4 text-sm">
+              <span>{error}</span>
+            </div>
+          )}
+
+          <label className="label text-xl">I want to join as a</label>
           <div className="flex gap-4 mb-4">
-            <button
-              type="button"
-              className={`btn btn-wide border-black ${
-                form.role === "customer" ? "btn-active" : ""
-              }`}
-              onClick={() => setForm({ ...form, role: "customer" })}
-            >
+            <button type="button"
+              className={`btn btn-wide border-black ${form.role === "customer" ? "btn-active" : ""}`}
+              onClick={() => setForm({ ...form, role: "customer" })}>
               Customer
             </button>
-
-            <button
-              type="button"
-              className={`btn btn-wide border-black ${
-                form.role === "provider" ? "btn-active" : ""
-              }`}
-              onClick={() => setForm({ ...form, role: "provider" })}
-            >
+            <button type="button"
+              className={`btn btn-wide border-black ${form.role === "provider" ? "btn-active" : ""}`}
+              onClick={() => setForm({ ...form, role: "provider" })}>
               Provider
             </button>
           </div>
 
-          {/* NAME */}
           <div className="flex gap-4 mb-4">
             <div className="w-full">
               <label className="label">First Name</label>
-              <input
-                name="firstName"
-                type="text"
-                className="input w-full"
-                placeholder="First Name"
-                onChange={handleChange}
-              />
+              <input name="firstName" type="text" className="input w-full"
+                placeholder="First Name" value={form.firstName} onChange={handleChange} />
             </div>
-
             <div className="w-full">
               <label className="label">Last Name</label>
-              <input
-                name="lastName"
-                type="text"
-                className="input w-full"
-                placeholder="Last Name"
-                onChange={handleChange}
-              />
+              <input name="lastName" type="text" className="input w-full"
+                placeholder="Last Name" value={form.lastName} onChange={handleChange} />
             </div>
           </div>
 
-          {/* EMAIL */}
           <label className="label">Email Address</label>
-          <input
-            name="email"
-            type="email"
-            className="input w-full"
-            placeholder="Enter Your Email"
-            onChange={handleChange}
-          />
+          <input name="email" type="email" className="input w-full"
+            placeholder="Enter Your Email" value={form.email} onChange={handleChange} />
 
-          {/* PASSWORD */}
           <label className="label">Password</label>
-          <input
-            name="password"
-            type="password"
-            className="input w-full"
-            placeholder="Create a Password"
-            onChange={handleChange}
-          />
+          <input name="password" type="password" className="input w-full"
+            placeholder="Create a Password (min. 6 characters)" value={form.password} onChange={handleChange} />
 
           <label className="label">Confirm Password</label>
-          <input
-            name="confirmPassword"
-            type="password"
-            className="input w-full"
-            placeholder="Confirm Your Password"
-            onChange={handleChange}
-          />
+          <input name="confirmPassword" type="password" className="input w-full"
+            placeholder="Confirm Your Password" value={form.confirmPassword} onChange={handleChange} />
 
           <br />
 
-          {/* TERMS */}
-          <div className="flex gap-4">
-            <input
-              type="checkbox"
-              className="checkbox"
-              defaultChecked
-              onChange={(e) =>
-                setForm({ ...form, agree: e.target.checked })
-              }
-            />
-            <p>
-              I agree to the <b>Terms and Conditions</b> and{" "}
-              <b>Privacy Policy</b>
-            </p>
+          <div className="flex gap-4 items-start">
+            <input type="checkbox" className="checkbox mt-1" defaultChecked
+              onChange={(e) => setForm({ ...form, agree: e.target.checked })} />
+            <p>I agree to the <b>Terms and Conditions</b> and <b>Privacy Policy</b></p>
           </div>
 
           <br />
 
-          {/* SUBMIT */}
-          <button
-            className="btn btn-neutral mt-4 w-full"
-            onClick={handleSignUp}
-          >
-            Create Account
+          <button className="btn btn-neutral mt-4 w-full" onClick={handleSignUp} disabled={submitting}>
+            {submitting ? <span className="loading loading-spinner loading-sm" /> : "Create Account"}
           </button>
 
-          <div className="divider">Or SignUp with</div>
+          <div className="divider">Or Sign Up with</div>
 
-          {/* SOCIAL (UI only) */}
-          <div className="flex gap-24 w-full">
-            <button className="btn bg-white text-black border w-5/12">
-              Login with Google
-            </button>
-
-            <button className="btn bg-[#1A77F2] text-white w-5/12">
-              Login with Facebook
-            </button>
+          <div className="flex gap-4 w-full">
+            <button className="btn bg-white text-black border w-1/2">Sign Up with Google</button>
+            <button className="btn bg-[#1A77F2] text-white w-1/2">Sign Up with Facebook</button>
           </div>
 
-          <br />
-
-          <p className="text-center">
-            <u>
-              Already have an account?
-              <b>
-                <a href="/Login"> Login here</a>
-              </b>
-            </u>
+          <p className="text-center mt-4">
+            Already have an account?{" "}
+            <a href="/Login" className="font-bold underline">Login here</a>
           </p>
         </fieldset>
       </div>
