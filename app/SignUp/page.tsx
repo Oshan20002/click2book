@@ -1,4 +1,5 @@
 "use client";
+// This page runs on the client side
 
 import React, { useState, ChangeEvent, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
@@ -9,6 +10,7 @@ export default function SignUp() {
   const router = useRouter();
   const { user, loading } = useAuth();
 
+    // Form state to store all user input values
   const [form, setForm] = useState({
     role: "customer",
     firstName: "",
@@ -22,6 +24,8 @@ export default function SignUp() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
+
+    // If user is already logged in, redirect to homepage
   useEffect(() => {
     if (!loading && user) router.push("/");
   }, [user, loading, router]);
@@ -29,24 +33,30 @@ export default function SignUp() {
   const handleChange = (e: ChangeEvent<HTMLInputElement>) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSignUp = async () => {
-    setError("");
 
+    // Sign up logic
+  const handleSignUp = async () => {
+    setError(""); // clear previous errors
+
+    // Check if user agreed to terms
     if (!form.agree) {
       setError("You must agree to Terms and Conditions.");
       return;
     }
 
+    // Check password confirmation
     if (form.password !== form.confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
 
+     // Check required fields
     if (!form.firstName || !form.lastName || !form.email || !form.password) {
       setError("Please fill in all required fields.");
       return;
     }
 
+    // Password minimum length validation
     if (form.password.length < 6) {
       setError("Password must be at least 6 characters.");
       return;
@@ -54,7 +64,8 @@ export default function SignUp() {
 
     setSubmitting(true);
 
-    // Create auth user WITH metadata
+    // Create user in Supabase Authentication
+    // Also store extra data as metadata
     const { error: authError } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
@@ -67,6 +78,8 @@ export default function SignUp() {
       },
     });
 
+
+    // If Supabase returns error
     if (authError) {
       setError(authError.message);
       setSubmitting(false);
@@ -75,10 +88,10 @@ export default function SignUp() {
 
     setSubmitting(false);
 
-    // user must verify email before login
     router.push("/Login");
   };
 
+  // Show loading spinner while auth state is loading
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
@@ -207,18 +220,6 @@ export default function SignUp() {
               "Create Account"
             )}
           </button>
-
-          <div className="divider">Or Sign Up with</div>
-
-          <div className="flex gap-4 w-full">
-            <button className="btn bg-white text-black border w-1/2">
-              Sign Up with Google
-            </button>
-
-            <button className="btn bg-[#1A77F2] text-white w-1/2">
-              Sign Up with Facebook
-            </button>
-          </div>
 
           <p className="text-center mt-4">
             Already have an account?{" "}
