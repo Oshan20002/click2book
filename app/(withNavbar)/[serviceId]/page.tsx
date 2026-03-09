@@ -128,7 +128,7 @@ export default function ServiceDetails() {
     price: "",
   });
 
-  //BREAK TIMES
+  // Ad slot schedules with break times
 
   const [slotSchedules, setSlotSchedules] = useState<SlotSchedule[]>([
     {

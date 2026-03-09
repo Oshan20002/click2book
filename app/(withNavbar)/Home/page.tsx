@@ -601,7 +601,7 @@ Kegalle: [
 // Keywords & Categories
 
 const KEYWORDS = [
-  // 🏥 Health Care
+  //  Health Care
   { keyword: "Doctor", category: "Health Care" },
   { keyword: "Clinic", category: "Health Care" },
   { keyword: "Dental", category: "Health Care" },
@@ -609,7 +609,7 @@ const KEYWORDS = [
   { keyword: "Mental health counseling", category: "Health Care" },
   { keyword: "Ayurveda treatment", category: "Health Care" },
 
-  // 🎓 Education
+  //  Education
   { keyword: "Tutor", category: "Education" },
   { keyword: "Tuition", category: "Education" },
   { keyword: "Schooling", category: "Education" },
@@ -618,7 +618,7 @@ const KEYWORDS = [
   { keyword: "IELTS classes", category: "Education" },
   { keyword: "Programming courses", category: "Education" },
 
-  // 💇‍♀️ Beauty & Wellness
+  //  Beauty & Wellness
   { keyword: "Salon", category: "Beauty & Wellness" },
   { keyword: "Spa", category: "Beauty & Wellness" },
   { keyword: "Skincare", category: "Beauty & Wellness" },
@@ -626,20 +626,20 @@ const KEYWORDS = [
   { keyword: "Massage therapy", category: "Beauty & Wellness" },
   { keyword: "Yoga instructor", category: "Beauty & Wellness" },
 
-  // 🏠 Home Services
+  //  Home Services
   { keyword: "Electrician", category: "Home Services" },
   { keyword: "Plumber", category: "Home Services" },
   { keyword: "House cleaning", category: "Home Services" },
   { keyword: "AC repair", category: "Home Services" },
   { keyword: "CCTV installation", category: "Home Services" },
 
-  // 🐶 Pet & Animals
+  //  Pet & Animals
   { keyword: "Veterinary clinic", category: "Pet & Animals" },
   { keyword: "Pet grooming", category: "Pet & Animals" },
   { keyword: "Dog training", category: "Pet & Animals" },
   { keyword: "Pet boarding", category: "Pet & Animals" },
 
-  // 💻 Technology
+  // Technology
   { keyword: "Computer repair", category: "Technology" },
   { keyword: "Laptop repair", category: "Technology" },
   { keyword: "Servers", category: "Technology" },
@@ -860,9 +860,8 @@ const filteredCities = availableCities.filter((c) =>
   );
 }
 
-/* =========================
-  Category Card Component
-========================= */
+
+// Category Card Component
 
 function CategoryCard({
   title,
