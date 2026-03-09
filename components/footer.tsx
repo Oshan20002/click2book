@@ -28,7 +28,7 @@ const Footer: React.FC = () => {
           <h6 className="footer-title">Company</h6>
           <a className="link link-hover">About us</a>
           <a className="link link-hover">Contact</a>
-          <a className="link link-hover">Jobs</a>
+         <Link href="/Jobs" className="link link-hover">Jobs</Link>
           <a className="link link-hover">Press kit</a>
         </nav>
         <nav>
