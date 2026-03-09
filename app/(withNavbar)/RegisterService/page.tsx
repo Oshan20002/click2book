@@ -150,9 +150,8 @@ export default function RegisterService() {
           <option value="" disabled>Select Service Category</option>
           <option value="Home Services">Home Services</option>
           <option value="Beauty & Wellness">Beauty &amp; Wellness</option>
-          <option value="Automotive">Automotive</option>
           <option value="Education & Tutoring">Education &amp; Tutoring</option>
-          <option value="Events & Entertainment">Events &amp; Entertainment</option>
+          <option value="Pet & Animals">Pet &amp; Animals</option>
           <option value="Health & Medical">Health &amp; Medical</option>
           <option value="Technology & IT">Technology &amp; IT</option>
         </select>
