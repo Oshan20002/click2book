@@ -20,7 +20,7 @@ const Footer: React.FC = () => {
         <nav>
           <h6 className="footer-title">Services</h6>
           <Link href="/Branding" className="link link-hover">Branding</Link>
-          <a className="link link-hover">Design</a>
+          <Link href="/Design" className="link link-hover">Design</Link>
           <a className="link link-hover">Marketing</a>
           <a className="link link-hover">Advertisement</a>
         </nav>
