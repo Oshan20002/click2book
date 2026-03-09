@@ -1,15 +1,9 @@
 "use client";
 
-// app/SignUp/page.tsx
-//
-// Uses useAuth() to redirect already-logged-in users away.
-// On failed DB insert, signs out the orphaned auth user to prevent broken state.
-
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent, useEffect } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { useEffect } from "react";
 
 export default function SignUp() {
   const router = useRouter();
@@ -24,10 +18,10 @@ export default function SignUp() {
     confirmPassword: "",
     agree: true,
   });
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  // Redirect already-logged-in users
   useEffect(() => {
     if (!loading && user) router.push("/");
   }, [user, loading, router]);
@@ -38,17 +32,39 @@ export default function SignUp() {
   const handleSignUp = async () => {
     setError("");
 
-    if (!form.agree) { setError("You must agree to Terms and Conditions."); return; }
-    if (form.password !== form.confirmPassword) { setError("Passwords do not match."); return; }
-    if (!form.firstName || !form.lastName || !form.email || !form.password) { setError("Please fill in all required fields."); return; }
-    if (form.password.length < 6) { setError("Password must be at least 6 characters."); return; }
+    if (!form.agree) {
+      setError("You must agree to Terms and Conditions.");
+      return;
+    }
+
+    if (form.password !== form.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    if (!form.firstName || !form.lastName || !form.email || !form.password) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+
+    if (form.password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
 
     setSubmitting(true);
 
-    // Step 1: Create auth user
-    const { data, error: authError } = await supabase.auth.signUp({
+    // Create auth user WITH metadata
+    const { error: authError } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
+      options: {
+        data: {
+          first_name: form.firstName,
+          last_name: form.lastName,
+          role: form.role,
+        },
+      },
     });
 
     if (authError) {
@@ -57,25 +73,9 @@ export default function SignUp() {
       return;
     }
 
-    // Step 2: Insert user profile
-    const { error: profileError } = await supabase.from("users").insert({
-      id: data?.user?.id,
-      first_name: form.firstName,
-      last_name: form.lastName,
-      email: form.email,
-      role: form.role,
-    });
-
-    if (profileError) {
-      // Roll back the auth user to prevent an orphaned account
-      // that would break every future login attempt.
-      await supabase.auth.signOut();
-      setError("Account setup failed: " + profileError.message + ". Please try again.");
-      setSubmitting(false);
-      return;
-    }
-
     setSubmitting(false);
+
+    // user must verify email before login
     router.push("/Login");
   };
 
@@ -103,14 +103,23 @@ export default function SignUp() {
 
           <label className="label text-xl">I want to join as a</label>
           <div className="flex gap-4 mb-4">
-            <button type="button"
-              className={`btn btn-wide border-black ${form.role === "customer" ? "btn-active" : ""}`}
-              onClick={() => setForm({ ...form, role: "customer" })}>
+            <button
+              type="button"
+              className={`btn btn-wide border-black ${
+                form.role === "customer" ? "btn-active" : ""
+              }`}
+              onClick={() => setForm({ ...form, role: "customer" })}
+            >
               Customer
             </button>
-            <button type="button"
-              className={`btn btn-wide border-black ${form.role === "provider" ? "btn-active" : ""}`}
-              onClick={() => setForm({ ...form, role: "provider" })}>
+
+            <button
+              type="button"
+              className={`btn btn-wide border-black ${
+                form.role === "provider" ? "btn-active" : ""
+              }`}
+              onClick={() => setForm({ ...form, role: "provider" })}
+            >
               Provider
             </button>
           </div>
@@ -118,53 +127,106 @@ export default function SignUp() {
           <div className="flex gap-4 mb-4">
             <div className="w-full">
               <label className="label">First Name</label>
-              <input name="firstName" type="text" className="input w-full"
-                placeholder="First Name" value={form.firstName} onChange={handleChange} />
+              <input
+                name="firstName"
+                type="text"
+                className="input w-full"
+                placeholder="First Name"
+                value={form.firstName}
+                onChange={handleChange}
+              />
             </div>
+
             <div className="w-full">
               <label className="label">Last Name</label>
-              <input name="lastName" type="text" className="input w-full"
-                placeholder="Last Name" value={form.lastName} onChange={handleChange} />
+              <input
+                name="lastName"
+                type="text"
+                className="input w-full"
+                placeholder="Last Name"
+                value={form.lastName}
+                onChange={handleChange}
+              />
             </div>
           </div>
 
           <label className="label">Email Address</label>
-          <input name="email" type="email" className="input w-full"
-            placeholder="Enter Your Email" value={form.email} onChange={handleChange} />
+          <input
+            name="email"
+            type="email"
+            className="input w-full"
+            placeholder="Enter Your Email"
+            value={form.email}
+            onChange={handleChange}
+          />
 
           <label className="label">Password</label>
-          <input name="password" type="password" className="input w-full"
-            placeholder="Create a Password (min. 6 characters)" value={form.password} onChange={handleChange} />
+          <input
+            name="password"
+            type="password"
+            className="input w-full"
+            placeholder="Create a Password (min. 6 characters)"
+            value={form.password}
+            onChange={handleChange}
+          />
 
           <label className="label">Confirm Password</label>
-          <input name="confirmPassword" type="password" className="input w-full"
-            placeholder="Confirm Your Password" value={form.confirmPassword} onChange={handleChange} />
+          <input
+            name="confirmPassword"
+            type="password"
+            className="input w-full"
+            placeholder="Confirm Your Password"
+            value={form.confirmPassword}
+            onChange={handleChange}
+          />
 
           <br />
 
           <div className="flex gap-4 items-start">
-            <input type="checkbox" className="checkbox mt-1" defaultChecked
-              onChange={(e) => setForm({ ...form, agree: e.target.checked })} />
-            <p>I agree to the <b>Terms and Conditions</b> and <b>Privacy Policy</b></p>
+            <input
+              type="checkbox"
+              className="checkbox mt-1"
+              defaultChecked
+              onChange={(e) => setForm({ ...form, agree: e.target.checked })}
+            />
+            <p>
+              I agree to the <b>Terms and Conditions</b> and <b>Privacy Policy</b>
+            </p>
           </div>
 
           <br />
 
-          <button className="btn btn-neutral mt-4 w-full" onClick={handleSignUp} disabled={submitting}>
-            {submitting ? <span className="loading loading-spinner loading-sm" /> : "Create Account"}
+          <button
+            className="btn btn-neutral mt-4 w-full"
+            onClick={handleSignUp}
+            disabled={submitting}
+          >
+            {submitting ? (
+              <span className="loading loading-spinner loading-sm" />
+            ) : (
+              "Create Account"
+            )}
           </button>
 
           <div className="divider">Or Sign Up with</div>
 
           <div className="flex gap-4 w-full">
-            <button className="btn bg-white text-black border w-1/2">Sign Up with Google</button>
-            <button className="btn bg-[#1A77F2] text-white w-1/2">Sign Up with Facebook</button>
+            <button className="btn bg-white text-black border w-1/2">
+              Sign Up with Google
+            </button>
+
+            <button className="btn bg-[#1A77F2] text-white w-1/2">
+              Sign Up with Facebook
+            </button>
           </div>
 
           <p className="text-center mt-4">
             Already have an account?{" "}
-            <a href="/Login" className="font-bold underline">Login here</a>
+            <a href="/Login" className="font-bold underline">
+              Login here
+            </a>
           </p>
+
         </fieldset>
       </div>
     </main>
