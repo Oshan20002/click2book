@@ -29,7 +29,7 @@ export default function About() {
           </p>
           <br />
           <p>
-            We believe everyone deserves access to quality services at fair
+            We believe everyone deserves access to quality services at fair0000000000000000000000000000000000000
             prices, and every service provider deserves the opportunity to grow
             their business.
           </p>
